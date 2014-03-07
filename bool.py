@@ -43,7 +43,7 @@ class Spr():
         self.ime=ime
 
     def __repr__(self):
-        return self.ime
+        return str(self.ime)
 
     def __eq__(self,other):
         if type(other)==Spr:
@@ -68,7 +68,10 @@ class Neg():
         self.izr = izr
 
     def __repr__(self):
-        return "¬"+repr(self.izr)
+        if type(self.izr)!=Ali and type(self.izr)!=In:
+            return "¬"+repr(self.izr)
+        else:
+            return "¬("+repr(self.izr)+")"
 
     def __eq__(self,other):
         if type(other) == Neg:
@@ -108,9 +111,12 @@ class In():
     def __repr__(self):
         niz=""
         for i in self.sez:
-            niz+=" ∧ "+repr(i)
+            if type(i)!=In and type(i)!=Ali:
+                niz+=" ∧ "+repr(i)
+            else:
+                niz+=" ∧ ("+repr(i)+")"
 
-        return "("+niz[3:]+")"
+        return niz[3:]
 
     def __eq__(self,other):
         if type(other)==In:
@@ -143,14 +149,14 @@ class In():
                 slo[type(i)]={i}
 
         #complementary law
-        if Neg in slo:
+        if Neg in slo.keys():
             for i in slo[Neg]:
                 for j in slo.values():
                     if i.izr in j:
                         return F()
 
         #absorpcija in common identities
-        if Ali in slo:
+        if Ali in slo.keys():
             menjave={}
             for i in slo[Ali]:
                 for j in slo.values():
@@ -159,18 +165,36 @@ class In():
                             menjave[i]=0
                         elif Neg(k) in i.sez:
                             menjave[i]=i.sez-{Neg(k)}
-            slo[Ali]={(Ali(*tuple(menjave[i])) if menjave[i]!=0 else None )if i in menjave else i for i in slo[Ali]} - {None}
-        
-        #distributivnost
+            slo[Ali]={(Ali(*tuple(menjave[i])) if menjave[i]!=0 else None ).poenostavi() if i in menjave else i for i in slo[Ali]} - {None}
 
-        if In in slo:
+        #distributivnost
+            if len(slo[Ali])>1:
+                presek = 42
+                for i in slo[Ali]:
+                    if presek==42:
+                        presek={j for j in i.sez}
+                    else:
+                        presek&=i.sez
+                if presek:
+                    slo[Ali]={Ali(
+                        In(*tuple(set().union(*tuple(i.sez-presek for i in slo[Ali])))),
+                        *tuple(presek)
+                        )}
+                
+                
+                
+        
+
+        #če imaš In znotraj In, ju lahko združiš
+        if In in slo.keys():
             for j in slo[In]:
                 for i in j.sez:
                     if type(i) in slo: slo[type(i)].add(i)
                     else: slo[type(i)]={i}
       
             del slo[In]
-        
+
+        #sestavi poenostavljen izraz
         mn=set()
         for i in slo.values():
             mn|=i
@@ -185,9 +209,12 @@ class Ali():
     def __repr__(self):
         niz=""
         for i in self.sez:
-            niz+=" ∨ "+repr(i)
+            if type(i)!=Ali and type(i)!=In:
+                niz+=" ∨ "+repr(i)
+            else:
+                niz+=" ∨ ("+repr(i)+")"
 
-        return "("+niz[3:]+")"
+        return niz[3:]
 
     def __eq__(self,other):
         if type(other)==Ali:
@@ -220,14 +247,14 @@ class Ali():
                 slo[type(i)]={i}
         
         #complementary law
-        if Neg in slo:
+        if Neg in slo.keys():
             for i in slo[Neg]:
                 for j in slo.values():
                     if i.izr in j:
                         return T()
 
         #absorpcija in common identities in distributivnost
-        if In in slo:
+        if In in slo.keys():
             menjave={}
             for i in slo[In]:
                 for j in slo.values():
@@ -236,12 +263,25 @@ class Ali():
                             menjave[i]=0
                         elif Neg(k) in i.sez: #common id
                             menjave[i]=i.sez-{Neg(k)}
-            slo[In]={(In(*tuple(menjave[i])) if menjave[i]!=0 else None )if i in menjave else i for i in slo[In]} - {None}
+            slo[In]={(In(*tuple(menjave[i])) if menjave[i]!=0 else None ).poenostavi() if i in menjave else i for i in slo[In]} - {None}
         
             #distributivnost
+            if len(slo[In])>1:
+                presek = 42
+                for i in slo[In]:
+                    if presek==42:
+                        presek={j for j in i.sez}
+                    else:
+                        presek&=i.sez
+                if presek:
+                    slo[In]={In(
+                        Ali(*tuple(set().union(*tuple(i.sez-presek for i in slo[In])))),
+                        *tuple(presek)
+                        )}
 
+                
        
-        if Ali in slo:
+        if Ali in slo.keys():
             for j in slo[Ali]:
                 for i in j.sez:
                     if type(i) in slo: slo[type(i)].add(i)
@@ -254,11 +294,21 @@ class Ali():
             mn|=i
         return Ali(*tuple(mn))
 
-primer1 = Ali(Spr("p"),In(Spr("q"),Spr("p")))
+p = Spr("p")
+q = Spr("q")
+r = Spr("r")
 
-primer2 = In(Spr("p"),Ali(Spr("q"),Neg(Spr("p"))))
+primer1 = Ali(p,In(q,p))
 
-primer3 = In(Ali(Spr("p"),Spr("q")),Ali(Spr("p"),Spr("r")))
+primer2 = In(p,Ali(q,Neg(p)))
+
+primer3 = In(Ali(p,q),Ali(p,r))
+
+primer4 = In(In(p,q),In(q,r),In(r,p))
+
+primer5 = In(Ali(p,q),Ali(q,r),Ali(r,p),Neg(In(p,q)),Neg(In(q,r)),Neg(In(r,p)))
+
+            
 
 
 
