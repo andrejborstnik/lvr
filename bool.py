@@ -14,7 +14,7 @@ class T():
     def vrednost(self,slo):
         return True
 
-    def poenostavi(self):
+    def poenostavi(self,cnf=False):
         return self
 
     def spremenljivke(self):
@@ -37,7 +37,7 @@ class F():
     def vrednost(self,slo):
         return False
 
-    def poenostavi(self):
+    def poenostavi(self,cnf=False):
         return self
 
     def spremenljivke(self):
@@ -63,7 +63,7 @@ class Spr():
     def vrednost(self,slo):
         return slo[self.ime]
 
-    def poenostavi(self):
+    def poenostavi(self,cnf=False):
         return self
 
     def spremenljivke(self):
@@ -148,7 +148,7 @@ class In():
         elif len(self.sez)==1: return self.sez.pop().poenostavi(cnf)
         slo = {}
         for i in self.sez:
-            i=i.poenostavi()
+            i=i.poenostavi(cnf)
             if type(i)==F: return F()
             elif type(i)==T: pass
             elif type(i) in slo:
@@ -252,7 +252,7 @@ class Ali():
         elif len(self.sez)==1: return self.sez.pop().poenostavi(cnf)
         slo = {}
         for i in self.sez:
-            i=i.poenostavi()
+            i=i.poenostavi(cnf)
             if type(i)==T: return T()
             elif type(i)==F: pass
             elif type(i) in slo:
@@ -304,7 +304,6 @@ class Ali():
 
             if cnf:
                 a = min(slo[In],key=lambda x:len(x.sez))
-                print(set().union(*tuple(slo.values()))-{a})
                 return In(*tuple(Ali(x,*tuple(set().union(*tuple(slo.values()))-{a})) for x in a.sez)).poenostavi(True)
                     
        
@@ -476,7 +475,7 @@ from random import random
 from re import sub
 def primer(b = True, n = False):
     #Maximalna velikost primera je 1000.
-    moznosti = ["In","Ali","Spr","Spr","Spr","Spr"]
+    moznosti = ["In","Ali","Spr","Spr"]
     moznosti1 = ["In","Ali"]
     i=0
     globina = 1
@@ -496,9 +495,9 @@ def primer(b = True, n = False):
                 if formula[-1] == ",":
                     formula = formula[:-1]
                 if random()<1/2:
-                    formula+="),"+a+"("+str(i)+"),"
+                    formula+="),"+a+"( \'x"+str(i)+"\' ),"
                 else:
-                    formula+="),"+"Neg("+a+"("+str(i)+")),"
+                    formula+="),"+"Neg("+a+"(\'x"+str(i)+"\')),"
             else:
                 if formula[-1] == ",":
                     formula = formula[:-1]
@@ -510,20 +509,20 @@ def primer(b = True, n = False):
             else:
                 i+=1
                 if random()<1/2:
-                    formula+= a+"("+str(i)+"),"
+                    formula+= a+"(\'x"+str(i)+"\'),"
                 else:
-                    formula+= "Neg("+a+"("+str(i)+")),"
+                    formula+= "Neg("+a+"(\'x"+str(i)+"\')),"
     if formula[-1] == ",":
         formula=formula[:-1]
     formula+=")"
     while globina>1:
         globina-=1
         formula+=")"
-    #formula = sub(r"Neg\(\),*",r"",formula)
+    formula = sub(r"In\(\),*",r"",formula)
+    formula = sub(r"Ali\(\),*",r"",formula)
     return eval(formula)
 
 
-print(primer(n = 300))
 
 
 
