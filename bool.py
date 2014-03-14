@@ -17,6 +17,9 @@ class T():
     def poenostavi(self):
         return self
 
+    def spremenljivke(self):
+        return set()
+
 ###################################################
 class F():
     def __init__(self):
@@ -36,6 +39,9 @@ class F():
 
     def poenostavi(self):
         return self
+
+    def spremenljivke(self):
+        return set()
 
 ###################################################
 class Spr():
@@ -60,7 +66,8 @@ class Spr():
     def poenostavi(self):
         return self
 
-
+    def spremenljivke(self):
+        return {self.ime}
     
 ######################################################
 class Neg():
@@ -85,8 +92,8 @@ class Neg():
     def vrednost(self,slo):
         return not self.izr.vrednost(slo)
 
-    def poenostavi(self):
-        a = self.izr.poenostavi()
+    def poenostavi(self,cnf=False):
+        a = self.izr.poenostavi(cnf)
         tip = type(a)
         if tip == T:
             return F()
@@ -97,11 +104,12 @@ class Neg():
         elif tip == Neg:
             return a.izr
         elif tip == In:
-            return Ali(*tuple(Neg(i) for i in a.sez)).poenostavi()
+            return Ali(*tuple(Neg(i) for i in a.sez)).poenostavi(cnf)
         elif tip == Ali:
-            return In(*tuple(Neg(i) for i in a.sez)).poenostavi()
+            return In(*tuple(Neg(i) for i in a.sez)).poenostavi(cnf)
 
-
+    def spremenljivke(self):
+        return self.izr.spremenljivke()
 
 #####################################################
 class In():
@@ -135,9 +143,9 @@ class In():
                 return a
         return a
 
-    def poenostavi(self):
+    def poenostavi(self,cnf=False):
         if len(self.sez)==0: return T()
-        elif len(self.sez)==1: return self.sez.pop().poenostavi()
+        elif len(self.sez)==1: return self.sez.pop().poenostavi(cnf)
         slo = {}
         for i in self.sez:
             i=i.poenostavi()
@@ -147,6 +155,15 @@ class In():
                 slo[type(i)].add(i)
             else:
                 slo[type(i)]={i}
+
+        #če imaš In znotraj In, ju lahko združiš
+        if In in slo.keys():
+            for j in slo[In]:
+                for i in j.sez:
+                    if type(i) in slo: slo[type(i)].add(i)
+                    else: slo[type(i)]={i}
+      
+            del slo[In]
 
         #complementary law
         if Neg in slo.keys():
@@ -165,10 +182,10 @@ class In():
                             menjave[i]=0
                         elif Neg(k) in i.sez:
                             menjave[i]=i.sez-{Neg(k)}
-            slo[Ali]={(Ali(*tuple(menjave[i])) if menjave[i]!=0 else None ).poenostavi() if i in menjave else i for i in slo[Ali]} - {None}
+            slo[Ali]={(Ali(*tuple(menjave[i])) if menjave[i]!=0 else None ).poenostavi(cnf) if i in menjave else i for i in slo[Ali]} - {None}
 
         #distributivnost
-            if len(slo[Ali])>1:
+            if len(slo[Ali])>1 and not cnf:
                 presek = 42
                 for i in slo[Ali]:
                     if presek==42:
@@ -181,27 +198,24 @@ class In():
                         *tuple(presek)
                         )}
                 
-                
-                
-        
-
-        #če imaš In znotraj In, ju lahko združiš
-        if In in slo.keys():
-            for j in slo[In]:
-                for i in j.sez:
-                    if type(i) in slo: slo[type(i)].add(i)
-                    else: slo[type(i)]={i}
-      
-            del slo[In]
 
         #sestavi poenostavljen izraz
         mn=set()
         for i in slo.values():
             mn|=i
-        return In(*tuple(mn))
+        temp = In(*tuple(mn))
+        if len(temp.sez)==1: return temp.sez.pop()
+        else: return temp
     
-        
+    def spremenljivke(self):
+        a = set()
+        for i in self.sez:
+            a|=i.spremenljivke()
+        return a
+
+    
 ########################################################
+    
 class Ali():
     def __init__(self,*args):
         self.sez=set(args)
@@ -233,9 +247,9 @@ class Ali():
                 return a
         return a
 
-    def poenostavi(self):
+    def poenostavi(self,cnf=False):
         if len(self.sez)==0: return F()
-        elif len(self.sez)==1: return self.sez.pop().poenostavi()
+        elif len(self.sez)==1: return self.sez.pop().poenostavi(cnf)
         slo = {}
         for i in self.sez:
             i=i.poenostavi()
@@ -245,6 +259,15 @@ class Ali():
                 slo[type(i)].add(i)
             else:
                 slo[type(i)]={i}
+
+        #če imaš Ali znotraj Ali, ju lahko združiš
+        if Ali in slo.keys():
+            for j in slo[Ali]:
+                for i in j.sez:
+                    if type(i) in slo: slo[type(i)].add(i)
+                    else: slo[type(i)]={i}
+      
+            del slo[Ali]
         
         #complementary law
         if Neg in slo.keys():
@@ -263,7 +286,7 @@ class Ali():
                             menjave[i]=0
                         elif Neg(k) in i.sez: #common id
                             menjave[i]=i.sez-{Neg(k)}
-            slo[In]={(In(*tuple(menjave[i])) if menjave[i]!=0 else None ).poenostavi() if i in menjave else i for i in slo[In]} - {None}
+            slo[In]={(In(*tuple(menjave[i])) if menjave[i]!=0 else None ).poenostavi(cnf) if i in menjave else i for i in slo[In]} - {None}
         
             #distributivnost
             if len(slo[In])>1:
@@ -279,20 +302,38 @@ class Ali():
                         *tuple(presek)
                         )}
 
-                
+            if cnf:
+                a = min(slo[In],key=lambda x:len(x.sez))
+                print(set().union(*tuple(slo.values()))-{a})
+                return In(*tuple(Ali(x,*tuple(set().union(*tuple(slo.values()))-{a})) for x in a.sez)).poenostavi(True)
+                    
        
-        if Ali in slo.keys():
-            for j in slo[Ali]:
-                for i in j.sez:
-                    if type(i) in slo: slo[type(i)].add(i)
-                    else: slo[type(i)]={i}
-      
-            del slo[Ali]
+        
 
         mn=set()
         for i in slo.values():
             mn|=i
-        return Ali(*tuple(mn))
+        temp = Ali(*tuple(mn))
+        if len(temp.sez)==1: return temp.sez.pop()
+        else: return temp
+
+    def spremenljivke(self):
+        a = set()
+        for i in self.sez:
+            a|=i.spremenljivke()
+        return a
+
+
+def CNF(formula):
+    """pretvori dano formulo v konjuktivno normalno obliko"""
+    f = formula.poenostavi(cnf = True)
+    
+    
+    
+    
+    
+
+###################### TESTNI PRIMERI ZA POENOSTAVLJANJE ##################################################################################
 
 p = Spr("p")
 q = Spr("q")
@@ -387,7 +428,44 @@ def povezanost(g):
     return In(f1,f2,f3,f4).poenostavi()
 
             
+##################### REŠEVANJE SAT #######################################################################
+
+def bfSAT(formula):
+    spr = formula.spremenljivke()
+    n=len(spr)
+
+    def poskusi(ze,se,form):
+        if se:
+            x = se.pop()
+            
+            ze[x]=False
+            a= poskusi(ze,se,form)
+            if a: return a
+            
+            ze[x]=True
+            a= poskusi(ze,se,form)
+            se|={x}
+            return a
+
+    
+            
+        else:
+            if form.vrednost(ze):
+                return ze
+            else:
+                return False
+
+    if spr:
+        return poskusi({},spr,formula)
         
+    else:
+        if form.vrednost({}):
+            return {}
+        else:
+            return False
+            
+
+    
             
 
 
