@@ -428,6 +428,7 @@ def povezanost(g):
     return In(f1,f2,f3,f4).poenostavi()
 
             
+
 ##################### REŠEVANJE SAT #######################################################################
 
 def bfSAT(formula):
@@ -469,6 +470,60 @@ def bfSAT(formula):
             
 
 
+
+
+from random import random
+from re import sub
+def primer(b = True, n = False):
+    #Maximalna velikost primera je 1000.
+    moznosti = ["In","Ali","Spr","Spr","Spr","Spr"]
+    moznosti1 = ["In","Ali"]
+    i=0
+    globina = 1
+    cc = int(random()*len(moznosti1))
+    c = moznosti1[cc]
+    formula = c+"("
+    if not n:
+        n = int(random()*1000)
+    for i in range(n):
+        aa = int(random()*len(moznosti))
+        a= moznosti[aa]
+        if globina > 1 and random()< 1/2:
+            #pade vn iz sedanjega in-a/ali-ja oz. not-a, če se da
+            if a == "Spr":
+                i+=1
+                globina-=1
+                if formula[-1] == ",":
+                    formula = formula[:-1]
+                if random()<1/2:
+                    formula+="),"+a+"("+str(i)+"),"
+                else:
+                    formula+="),"+"Neg("+a+"("+str(i)+")),"
+            else:
+                if formula[-1] == ",":
+                    formula = formula[:-1]
+                formula+="),"+a+"("
+        else:
+            if a!= "Spr":
+                globina+=1
+                formula+= a+"("
+            else:
+                i+=1
+                if random()<1/2:
+                    formula+= a+"("+str(i)+"),"
+                else:
+                    formula+= "Neg("+a+"("+str(i)+")),"
+    if formula[-1] == ",":
+        formula=formula[:-1]
+    formula+=")"
+    while globina>1:
+        globina-=1
+        formula+=")"
+    #formula = sub(r"Neg\(\),*",r"",formula)
+    return eval(formula)
+
+
+print(primer(n = 300))
 
 
 
