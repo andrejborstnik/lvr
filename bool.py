@@ -508,11 +508,29 @@ def cista(formula,i):
         return True,False #še false, da vemo, da nastopa i samo z negacijo. To bo vrednost spr i.
     return True,True
 
-def DPLL(formul,vrednosti = {}):
+from time import clock
+def DPLL(formula,cas = True):
+    #Če želimo imeti vse spremenljivke definirane uporabimo zakomentirano.
+    t1 = clock()
+##    pomo = DPLLpomo(formula.kopiraj())
+##    spr = formula.spremenljivke()
+##    if not pomo:
+##        return False
+##    for i in spr:
+##        if i not in pomo.keys():
+##            pomo[i] = False/True, kar nam paše
+##    return pomo
+    a = DPLLpomo(formula.kopija())
+    t2 = clock()
+    if cas:
+        print("Čas za izračun:  {0}".format(t2-t1))
+    print("Rešitev: ")
+    return a
+
+def DPLLpomo(formula,vrednosti = {}):
     #formula mora biti v cnf obliki. Če ni, jo v to spremenimo
     #vrne valucaijo, če ta obstaja in False sicer (pozor!!! valuacija je lahko prazen slovar!)
 
-    formula = formul.kopija()
     formula = CNF(formula)#že poenostavi zraven
     
     if formula == F():
@@ -530,19 +548,19 @@ def DPLL(formul,vrednosti = {}):
     novevrednosti = {0:1}
     while novevrednosti:
         novevrednosti = {}
-        odstrani = [] #da deluje hitreje odstranimo tiste enojce, ki smo jih določili. ??? Ali je to res hitreje?
+        #odstrani = [] #da deluje hitreje odstranimo tiste enojce, ki smo jih določili. ??? Ali je to res hitreje?
         for i in formula.sez:
             #In(Ali(Spr("x"))) je že poenostavljen v In(Spr("x")), In(Ali()) pa v False, tako da smo pokrili vse primere.
             if type(i) == Spr:
                 novevrednosti[i.ime] = True
                 vrednosti[i.ime] = True
-                odstrani.append(i)
+                ##odstrani.append(i)
             elif type(i) == Neg:#Negacija ima notri samo eno spr, saj smo že poenostavili.
-                odstrani.append(i)
+                ##odstrani.append(i)
                 novevrednosti[i.izr.ime] = False
                 vrednosti[i.izr.ime] = False
-        for i in odstrani:
-            formula.sez.remove(i)
+##        for i in odstrani:
+##            formula.sez.remove(i)
         formula = formula.vstavi(novevrednosti).poenostavi(True)
         if type(formula)==T:
             return vrednosti
