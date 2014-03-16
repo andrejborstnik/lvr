@@ -17,8 +17,11 @@ class T():
     def vstavi(self,slo):
         return self
 
+    def kopija(self):
+        return T()
+    
     def poenostavi(self,cnf=False):
-        return self
+        return T()
 
     def spremenljivke(self):
         return set()
@@ -43,8 +46,11 @@ class F():
     def vstavi(self,slo):
         return self
 
+    def kopija(self):
+        return F()
+    
     def poenostavi(self,cnf=False):
-        return self
+        return F()
 
     def spremenljivke(self):
         return set()
@@ -77,8 +83,11 @@ class Spr():
             return F()
         return self
 
+    def kopija(self):
+        return Spr(self.ime)
+    
     def poenostavi(self,cnf=False):
-        return self
+        return Spr(self.ime)
 
     def spremenljivke(self):
         return {self.ime}
@@ -109,8 +118,11 @@ class Neg():
     def vstavi(self,slo):
         return Neg(self.izr.vstavi(slo))
 
+    def kopija(self):
+        return Neg(self.izr.kopija())
+    
     def poenostavi(self,cnf=False):
-        a = self.izr.poenostavi(cnf)
+        a = self.izr.kopija().poenostavi(cnf)
         tip = type(a)
         if tip == T:
             return F()
@@ -163,11 +175,14 @@ class In():
     def vstavi(self,slo):
         return In(*tuple(i.vstavi(slo) for i in self.sez))
 
+    def kopija(self):
+        return In(*tuple(i.kopija() for i in self.sez))
+    
     def poenostavi(self,cnf=False):
         if len(self.sez)==0: return T()
-        elif len(self.sez)==1: return self.sez.pop().poenostavi(cnf)
+        elif len(self.sez)==1: return self.kopija().sez.pop().poenostavi(cnf)
         slo = {}
-        for i in self.sez:
+        for i in self.kopija().sez:
             i=i.poenostavi(cnf)
             if type(i)==F: return F()
             elif type(i)==T: pass
@@ -270,11 +285,14 @@ class Ali():
     def vstavi(self,slo):
         return Ali(*tuple(i.vstavi(slo) for i in self.sez))
     
+    def kopija(self):
+        return Ali(*tuple(i.kopija() for i in self.sez))
+    
     def poenostavi(self,cnf=False):
         if len(self.sez)==0: return F()
-        elif len(self.sez)==1: return self.sez.pop().poenostavi(cnf)
+        elif len(self.sez)==1: return self.kopija().sez.pop().poenostavi(cnf)
         slo = {}
-        for i in self.sez:
+        for i in self.kopija().sez:
             i=i.poenostavi(cnf)
             if type(i)==T: return T()
             elif type(i)==F: pass
@@ -344,13 +362,7 @@ class Ali():
         for i in self.sez:
             a|=i.spremenljivke()
         return a
-
-
-def CNF(formula):
-    """pretvori dano formulo v konjuktivno normalno obliko"""
-    f = formula.poenostavi(cnf = True)
-    return f
-    
+  
     
 
 ###################### TESTNI PRIMERI ZA POENOSTAVLJANJE ##################################################################################
@@ -467,8 +479,6 @@ def bfSAT(formula):
             a= poskusi(ze,se,form)
             se|={x}
             return a
-
-    
             
         else:
             if form.vrednost(ze):
@@ -484,6 +494,7 @@ def bfSAT(formula):
             return {}
         else:
             return False
+
 
 def cista(formula,i):
     #dobi spremenljivko i pove ali v formuli nastopa čisto
