@@ -362,8 +362,11 @@ class Ali():
         for i in self.sez:
             a|=i.spremenljivke()
         return a
-  
-    
+
+def CNF(formula):
+    """pretvori dano formulo v konjuktivno normalno obliko"""
+    f = formula.poenostavi(cnf = True)
+    return f  
 
 ###################### TESTNI PRIMERI ZA POENOSTAVLJANJE ##################################################################################
 
@@ -505,10 +508,11 @@ def cista(formula,i):
         return True,False #še false, da vemo, da nastopa i samo z negacijo. To bo vrednost spr i.
     return True,True
 
-def DPLL(formula,vrednosti = {}):
+def DPLL(formul,vrednosti = {}):
     #formula mora biti v cnf obliki. Če ni, jo v to spremenimo
     #vrne valucaijo, če ta obstaja in False sicer (pozor!!! valuacija je lahko prazen slovar!)
 
+    formula = formul.kopija()
     formula = CNF(formula)#že poenostavi zraven
     
     if formula == F():
