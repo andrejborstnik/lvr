@@ -14,6 +14,9 @@ class T():
     def vrednost(self,slo):
         return True
 
+    def vstavi(self,slo):
+        return self
+
     def poenostavi(self,cnf=False):
         return self
 
@@ -36,6 +39,9 @@ class F():
 
     def vrednost(self,slo):
         return False
+
+    def vstavi(self,slo):
+        return self
 
     def poenostavi(self,cnf=False):
         return self
@@ -62,6 +68,14 @@ class Spr():
 
     def vrednost(self,slo):
         return slo[self.ime]
+
+    def vstavi(self,slo):
+        #Ni valuacija, ampak samo delno vstavljanje.
+        if self.ime in slo.keys():
+            if slo[self.ime]:
+                return T()
+            return F()
+        return self
 
     def poenostavi(self,cnf=False):
         return self
@@ -91,6 +105,9 @@ class Neg():
 
     def vrednost(self,slo):
         return not self.izr.vrednost(slo)
+
+    def vstavi(self,slo):
+        return Neg(self.izr.vstavi(slo))
 
     def poenostavi(self,cnf=False):
         a = self.izr.poenostavi(cnf)
@@ -143,6 +160,9 @@ class In():
                 return a
         return a
 
+    def vstavi(self,slo):
+        return In(*tuple(i.vstavi(slo) for i in self.sez))
+
     def poenostavi(self,cnf=False):
         if len(self.sez)==0: return T()
         elif len(self.sez)==1: return self.sez.pop().poenostavi(cnf)
@@ -182,7 +202,7 @@ class In():
                             menjave[i]=0
                         elif Neg(k) in i.sez:
                             menjave[i]=i.sez-{Neg(k)}
-            slo[Ali]={(Ali(*tuple(menjave[i])) if menjave[i]!=0 else None ).poenostavi(cnf) if i in menjave else i for i in slo[Ali]} - {None}
+            slo[Ali]={(Ali(*tuple(menjave[i])).poenostavi(cnf) if menjave[i]!=0 else None ) if i in menjave else i for i in slo[Ali]} - {None}#Poenostavi od None ne obstaja Tomaž!
 
         #distributivnost
             if len(slo[Ali])>1 and not cnf:
@@ -247,6 +267,9 @@ class Ali():
                 return a
         return a
 
+    def vstavi(self,slo):
+        return Ali(*tuple(i.vstavi(slo) for i in self.sez))
+    
     def poenostavi(self,cnf=False):
         if len(self.sez)==0: return F()
         elif len(self.sez)==1: return self.sez.pop().poenostavi(cnf)
@@ -286,7 +309,7 @@ class Ali():
                             menjave[i]=0
                         elif Neg(k) in i.sez: #common id
                             menjave[i]=i.sez-{Neg(k)}
-            slo[In]={(In(*tuple(menjave[i])) if menjave[i]!=0 else None ).poenostavi(cnf) if i in menjave else i for i in slo[In]} - {None}
+            slo[In]={(In(*tuple(menjave[i])).poenostavi(cnf) if menjave[i]!=0 else None ) if i in menjave else i for i in slo[In]} - {None}
         
             #distributivnost
             if len(slo[In])>1:
@@ -326,9 +349,7 @@ class Ali():
 def CNF(formula):
     """pretvori dano formulo v konjuktivno normalno obliko"""
     f = formula.poenostavi(cnf = True)
-    
-    
-    
+    return f
     
     
 
@@ -463,11 +484,94 @@ def bfSAT(formula):
             return {}
         else:
             return False
-            
 
+def cista(formula,i):
+    #dobi spremenljivko i pove ali v formuli nastopa čisto
+    form = repr(formula.poenostavi())
+    if ("¬"+i) in form:
+        if (" "+i) in form or ("("+i) in form or form[0:len(i)]==i: #Če sta notri hkrati i in negacija i, potem ni čista. Sicer je.
+            return False
+        return True,False #še false, da vemo, da nastopa i samo z negacijo. To bo vrednost spr i.
+    return True,True
+
+def DPLL(formula,vrednosti = {}):
+    #formula mora biti v cnf obliki. Če ni, jo v to spremenimo
+    #vrne valucaijo, če ta obstaja in False sicer (pozor!!! valuacija je lahko prazen slovar!)
+
+    formula = CNF(formula)#že poenostavi zraven
+    
+    if formula == F():
+        return False
+    elif type(formula) == Spr:
+        vrednosti[formula.ime] = True
+        return vrednosti
+    elif formula == T() or (not formula.sez):
+        return vrednosti
+
+    #za spremenljivke, ki nastopajo samostojno vemo kaj morajo biti, zato jih kar določimo in pokrajšamo formulo
+    novevrednosti = {0:1}
+    while novevrednosti:
+        novevrednosti = {}
+        odstrani = [] #da deluje hitreje odstranimo tiste enojce, ki smo jih določili. ??? Ali je to res hitreje?
+        for i in formula.sez:
+            #In(Ali(Spr("x"))) je že poenostavljen v In(Spr("x")), In(Ali()) pa v False, tako da smo pokrili vse primere.
+            if type(i) == Spr:
+                novevrednosti[i.ime] = True
+                vrednosti[i.ime] = True
+                odstrani.append(i)
+            elif type(i) == Neg:#Negacija ima notri samo eno spr, saj smo že poenostavili.
+                odstrani.append(i)
+                novevrednosti[i.izr.ime] = False
+                vrednosti[i.izr.ime] = False
+        for i in odstrani:
+            formula.sez.remove(i)
+        formula = formula.vstavi(novevrednosti).poenostavi(True)
+        if type(formula)==T:
+            return vrednosti
+        elif type(formula)==F:
+            return False
+
+    #Stavke s čistimi spremenljivkami lahko pobrišemo. Čiste spremenljivke dobijo ustrezno vrednost. glede na to ali nastopajo z negacijo oz. brez.
+    spr = formula.spremenljivke()
+    for i in spr:
+        pomo = cista(formula,i)
+        if pomo:
+            vrednosti[i] = pomo[1]
+            odstrani=[]
+            for k in formula.sez:
+                if i in repr(k):
+                    odstrani.append(k)
+            for k in odstrani:
+                formula.sez.remove(k)
+            formula = formula.poenostavi(True)
+            if type(formula)==T:
+                return vrednosti
+            elif type(formula)==F:
+                return False
+            elif type(formula)==Spr:
+                vrednosti[formula.ime] = True
+                return vrednosti
+
+    spr = formula.spremenljivke()
+    #Izberemo si neko spremenljivko in poizkusimo obe možnosti 
+    b = spr.pop()
+
+    formula1 = formula.vstavi({b:True}).poenostavi(True)
+    vrednosti[b] = True
+    pomo = DPLL(formula1, vrednosti)
+    if pomo:
+        return pomo[1]
+    
+    formula1 = formula.vstavi({b:False}).poenostavi(True)
+    vrednosti[b] = False
+    pomo = DPLL(formula1, vrednosti)
+    if pomo:
+        return pomo[1]
+    
+    return False
     
             
-
+##################### NAKLJUČNI TESTNI PRIMERI #######################################################################
 
 
 
