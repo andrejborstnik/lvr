@@ -505,6 +505,9 @@ def DPLL(formula,vrednosti = {}):
     elif type(formula) == Spr:
         vrednosti[formula.ime] = True
         return vrednosti
+    elif type(formula) == Neg:
+        vrednosti[formula.izr.ime] = True
+        return vrednosti
     elif formula == T() or (not formula.sez):
         return vrednosti
 
@@ -530,6 +533,12 @@ def DPLL(formula,vrednosti = {}):
             return vrednosti
         elif type(formula)==F:
             return False
+        elif type(formula) == Spr:
+            vrednosti[formula.ime] = True
+            return vrednosti
+        elif type(formula) == Neg:
+            vrednosti[formula.izr.ime] = True
+            return vrednosti
 
     #Stavke s čistimi spremenljivkami lahko pobrišemo. Čiste spremenljivke dobijo ustrezno vrednost. glede na to ali nastopajo z negacijo oz. brez.
     spr = formula.spremenljivke()
@@ -550,6 +559,9 @@ def DPLL(formula,vrednosti = {}):
                 return False
             elif type(formula)==Spr:
                 vrednosti[formula.ime] = True
+                return vrednosti
+            elif type(formula) == Neg:
+                vrednosti[formula.izr.ime] = False
                 return vrednosti
 
     spr = formula.spremenljivke()
