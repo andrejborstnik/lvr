@@ -466,6 +466,9 @@ def povezanost(g):
 
 ##################### REŠEVANJE SAT #######################################################################
 
+
+############ Brute force #########
+
 def bfSAT(formula):
     spr = formula.spremenljivke()
     n=len(spr)
@@ -499,6 +502,9 @@ def bfSAT(formula):
             return False
 
 
+
+############ DPLL ############
+        
 def cista(formula,i):
     #dobi spremenljivko i pove ali v formuli nastopa čisto
     form = repr(formula.poenostavi())
@@ -614,10 +620,89 @@ def DPLLpomo(formula,vrednosti = {}):
         return pomo[1]
     
     return False
+
+############### Chaff ############
+
+class UsageError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return self.value
+
+class Sklad():
+    
+    def __init__(self,n = 0):
+        self.sklad = [0]*n
+        self.head = -1
+
+    def dodaj(self,x):
+        self.head += 1
+        if len(self.sklad) > self.head:
+            self.sklad[self.head] = x
+        else:
+            self.sklad.append(x)
+
+    def odstrani(self):
+        if self.prazen:
+            raise UsageError("Ne moramo odstraniti elementov iz praznega sklada.")
+        self.head -= 1
+        return self.sklad[self.head+1]
+
+    def prazen(self):
+        if self.head < 0:
+            return True
+        return False
+
+def Chaff(formula):
+    formula = formula.kopiraj().poenostavi(True)
+    spr = formula.spremenljivke()
+    kazalci = [0] * len(spr)
+    obratnikazalci = {}
+    opazovaneSpr={}#Slovar, ki za spr. pove v katerih stavkih je opazovana.
+    k=0
+    for i in spr:
+        kazalci[k] = i
+        obratnikazalci[i] = k
+        opazovane[i] = set()
+        k += 1
+    vrednosti = [None] * len(kazalci)
+    izraz = []#Formulo spremenimo v seznam seznamov, ker bo tako lažje izvajati algoritem.
+    opazovaneSta = [] #Seznam, ki za stavke pove kateri spremenljivki sta v njem opazovani.
+    for i in formula.sez:
+        podizraz = []
+        if len(i.sez)>1:
+            for j in i.sez:
+                if type(j) == Spr: 
+                    podizraz.append((obratnikazalci[j],False)) #False pomeni da spremenljivka ni negirana
+                elif type(j) == Neg:
+                    podizraz.append((obratnikazalci[j.izr],True))
+                else:
+                    raise UsageError("Ta formula ni bila poenostavljena pravilno.")
+                
+            izraz.append(podizraz)
+##            opazene = 0
+##            k = 0
+##            while opazene < 2:
+##                pomo = podizraz[k]
+                
+                
+                    
+                
+        else:
+            if type(i) == Spr:
+                vrednosti[obratnikazalci[i]] = (True,2)#2, ker so to dokončne vrednosti in če bi se morale spremeniti bomo vrnili, da formula ni izponljiva
+            elif type(i) == Neg:
+                vrednosti[obratnikazalci[i.izr]] = (False,2)
+            else:
+                raise UsageError("Ta formula ni bila poenostavljena pravilno.")
+        
+    return None
+
+def pomoChaff(izraz):
+    return None
     
             
 ##################### NAKLJUČNI TESTNI PRIMERI #######################################################################
-
 
 
 from random import random
