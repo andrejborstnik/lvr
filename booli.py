@@ -219,7 +219,18 @@ class In():
                             menjave[i]=i.sez-{Neg(k)}
             slo[Ali]={(Ali(*tuple(menjave[i])).poenostavi(cnf) if menjave[i]!=0 else None ) if i in menjave else i for i in slo[Ali]} - {None}#Poenostavi od None ne obstaja Tomaž!
 
+            #po absorpciji je treba tipe podizrazov posodobiti
+            pomo=[]
+            for i in slo[Ali]:
+                if type(i)!=Ali:
+                    pomo.append(i)
+                    if type(i) in slo: slo[type(i)].add(i)
+                    else: slo[type(i)]={i}
+            for i in pomo: 
+                slo[Ali].remove(i)
+                
         #distributivnost
+                    
             if len(slo[Ali])>1 and not cnf:
                 presek = 42
                 for i in slo[Ali]:
@@ -239,7 +250,8 @@ class In():
         for i in slo.values():
             mn|=i
         temp = In(*tuple(mn))
-        if len(temp.sez)==1: return temp.sez.pop()
+        if len(temp.sez)==0: return T()
+        elif len(temp.sez)==1: return temp.kopija().sez.pop()
         else: return temp
     
     def spremenljivke(self):
@@ -328,6 +340,16 @@ class Ali():
                         elif Neg(k) in i.sez: #common id
                             menjave[i]=i.sez-{Neg(k)}
             slo[In]={(In(*tuple(menjave[i])).poenostavi(cnf) if menjave[i]!=0 else None ) if i in menjave else i for i in slo[In]} - {None}
+
+            #po absorpciji je treba tipe podizrazov posodobiti
+            pomo = []
+            for i in slo[In]:
+                if type(i)!=In:
+                    pomo.append(i)
+                    if type(i) in slo: slo[type(i)].add(i)
+                    else: slo[type(i)]={i}
+            for i in pomo: 
+                slo[In].remove(i) 
         
             #distributivnost
             if len(slo[In])>1:
@@ -354,7 +376,8 @@ class Ali():
         for i in slo.values():
             mn|=i
         temp = Ali(*tuple(mn))
-        if len(temp.sez)==1: return temp.sez.pop()
+        if len(temp.sez)==0: return F()
+        elif len(temp.sez)==1: return temp.kopija().sez.pop()
         else: return temp
 
     def spremenljivke(self):
@@ -365,8 +388,8 @@ class Ali():
 
 def CNF(formula):
     """pretvori dano formulo v konjuktivno normalno obliko"""
-    f = formula.poenostavi(cnf = True)
-    return f  
+    return formula.poenostavi(cnf = True)
+
 
 ###################### TESTNI PRIMERI ZA POENOSTAVLJANJE ##################################################################################
 

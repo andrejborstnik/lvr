@@ -1,4 +1,5 @@
 from booli import *
+from solver import *
 
 def barvanje(g,k):
     """Ali lahko graf podan s slovarjem g pobarvamo s k barvami? """
@@ -66,6 +67,6 @@ def povezanost(g):
 
             )
         )
-    
 
+    print(In(f1,f2,f3,f4))
     return In(f1,f2,f3,f4).poenostavi()
