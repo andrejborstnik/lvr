@@ -70,3 +70,47 @@ def povezanost(g):
 
     print(In(f1,f2,f3,f4))
     return In(f1,f2,f3,f4).poenostavi()
+
+def sudoku(tabela):
+    n = len(tabela)
+    k = int(n**0.5)
+    g = {(i,j):set()  for i in range(n) for j in range(n)}
+    for i in range(n):
+        for j in range(n):
+            for x in range(n):
+                if x != j: g[(i,j)].add((i,x))
+                if x != i: g[(i,j)].add((x,j))
+                if (k*(i//k) + x//k, k*(j//k)+x%k)!=(i,j): g[(i,j)].add((k*(i//k) + x//k, k*(j//k)+x%k))
+
+    #barve so 1,2,...,n
+
+    for i in range(1,n+1):
+        g[i]=set()
+        for j in range(1,n+1):
+            if i!=j: g[i].add(j)
+
+    for i in range(n):
+        for j in range(n):
+            if tabela[i][j]:
+                for x in range(1,n+1):
+                    if x != tabela[i][j]:
+                        g[(i,j)].add(x)
+                        g[x].add((i,j))
+
+    for i in g: print(i,g[i])
+    
+    return barvanje(g,n)
+
+
+
+
+
+
+
+
+
+
+
+
+
+

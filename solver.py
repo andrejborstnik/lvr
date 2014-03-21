@@ -93,16 +93,16 @@ def DPLLpomo(formula,vrednosti = {}):
 ##        for i in odstrani:
 ##            formula.sez.remove(i)
         formula = formula.vstavi(novevrednosti).poenostavi(True)
-    if type(formula)==T:
-        return vrednosti
-    elif type(formula)==F:
-        return False
-    elif type(formula) == Spr:
-        vrednosti[formula.ime] = True
-        return vrednosti
-    elif type(formula) == Neg:
-        vrednosti[formula.izr.ime] = True
-        return vrednosti
+        if type(formula)==T:
+            return vrednosti
+        elif type(formula)==F:
+            return False
+        elif type(formula) == Spr:
+            vrednosti[formula.ime] = True
+            return vrednosti
+        elif type(formula) == Neg:
+            vrednosti[formula.izr.ime] = True
+            return vrednosti
 
     #Stavke s čistimi spremenljivkami lahko pobrišemo. Čiste spremenljivke dobijo ustrezno vrednost. glede na to ali nastopajo z negacijo oz. brez.
     spr = formula.spremenljivke()
