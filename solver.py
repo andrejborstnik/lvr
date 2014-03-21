@@ -1,6 +1,5 @@
 from util import *
 from booli import *
-from prevedbe import *
 
 ############ Brute force #########
 
@@ -41,7 +40,7 @@ def bfSAT(formula):
 ############ DPLL ############
         
 from time import clock
-def DPLL(formula,cas = True):
+def DPLL(formula,cas = False):
     #Če želimo imeti vse spremenljivke definirane uporabimo zakomentirano.
     t1 = clock()
 ##    pomo = DPLLpomo(formula.kopiraj())
@@ -56,7 +55,7 @@ def DPLL(formula,cas = True):
     t2 = clock()
     if cas:
         print("Čas za izračun:  {0}".format(t2-t1))
-    print("Rešitev: ")
+    print("Rešitev: \n{0}".format(a))
     return a
 
 def DPLLpomo(formula,vrednosti = {}):
@@ -71,7 +70,7 @@ def DPLLpomo(formula,vrednosti = {}):
         vrednosti[formula.ime] = True
         return vrednosti
     elif type(formula) == Neg:
-        vrednosti[formula.izr.ime] = True
+        vrednosti[formula.izr.ime] = False
         return vrednosti
     elif formula == T() or (not formula.sez):
         return vrednosti
@@ -135,17 +134,14 @@ def DPLLpomo(formula,vrednosti = {}):
 
     formula1 = formula.vstavi({b:True}).poenostavi(True)
     vrednosti[b] = True
-    pomo = DPLL(formula1, vrednosti)
-    if pomo:
-        return pomo[1]
+    pomo = DPLLpomo(formula1, vrednosti)
+    if pomo!=False:
+        return pomo
     
     formula1 = formula.vstavi({b:False}).poenostavi(True)
     vrednosti[b] = False
-    pomo = DPLL(formula1, vrednosti)
-    if pomo:
-        return pomo[1]
-    
-    return False
+    pomo = DPLLpomo(formula1, vrednosti)
+    return pomo
 
 
 
