@@ -38,11 +38,13 @@ class Kopica:
         self.dvigni(len(self.sez) - 1)
 
     def odstrani(self):
-        najmanjsi = self.sez[0]
-        self.sez[0] = self.sez[len(self.sez) - 1]
-        del self.sez[len(self.sez) - 1]
-        self.spusti(0)
-        return najmanjsi
+        if self.sez:
+            najmanjsi = self.sez[0]
+            self.sez[0] = self.sez[len(self.sez) - 1]
+            del self.sez[len(self.sez) - 1]
+            self.spusti(0)
+            return najmanjsi
+        raise UsageError("Ne moramo odstraniti elementa prazne kopice.")
 
     def prazna(self):
         return len(self.sez) == 0
