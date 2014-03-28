@@ -217,7 +217,7 @@ class In():
                             menjave[i]=0
                         elif Neg(k) in i.sez:
                             menjave[i]=i.sez-{Neg(k)}
-            slo[Ali]={(Ali(*tuple(menjave[i])).poenostavi(cnf) if menjave[i]!=0 else None ) if i in menjave else i for i in slo[Ali]} - {None}#Poenostavi od None ne obstaja Tomaž!
+            slo[Ali]={(Ali(*tuple(menjave[i])).poenostavi(cnf) if menjave[i]!=0 else None ) if i in menjave else i for i in slo[Ali]} - {None}
 
             #po absorpciji je treba tipe podizrazov posodobiti
             pomo=[]
