@@ -168,7 +168,7 @@ def pChaff(formula):
     def izberi(literali):
         a = -1
         j = -1
-        print(vrednosti)
+        #print(vrednosti)
         for i in range(len(literali)):
             if not vrednosti[i] and  literali[i] > a:
                 a = literali[i]
@@ -176,14 +176,15 @@ def pChaff(formula):
         if j==-1 and not vrednosti[0]:
             j = 0
         elif j == -1:
-            raise UsageError("Vse spremenljivke imajo vrednosti, zato ni česa za izbrati.")
+            return None
+            #raise UsageError("Vse spremenljivke imajo vrednosti, zato ni česa za izbrati.")
         return j
-    def izpolnjen():
+    def izpolnjen(opazovaneSta,vrednosti):
         #gleda samo opazovane spr.
-        #print(vrednosti)
+        #print(vrednosti,len(vrednosti))
         #print(opazovaneSta)
-        print(len(opazovaneSta),sum([(vrednosti[i[0]] in [(True,1),(True,2)] or vrednosti[i[1]] in [(True,1),(True,2)])  for i in opazovaneSta]))
-        return len(opazovaneSta) == sum([(vrednosti[i[0]] in [(True,1),(True,2)] or vrednosti[i[1]] in [(True,1),(True,2)])  for i in opazovaneSta])
+        #print(len(opazovaneSta),sum([(vrednosti[i[0]] in [(True,1),(True,2)] or vrednosti[i[1]] in [(True,1),(True,2)])  for i in opazovaneSta if i]))
+        return len(opazovaneSta) == sum([(vrednosti[i[0]] in [(True,1),(True,2)] or vrednosti[i[1]] in [(True,1),(True,2)])  for i in opazovaneSta if i])
     formula = formula.poenostavi(True)
     spr = formula.spremenljivke()
     n = len(spr)
@@ -283,15 +284,16 @@ def pChaff(formula):
         while pomo[0] == "i":
             vrednosti[pomo[1]] = None
             vrednosti[pomo[1]+n*(-1)**(pomo[1]>=n)] = None
-            pomo = koraki.odstrani()
-        if vrednosti[pomo[1]][1] == 2:
-            if not backtrack():
+            if not koraki.prazen():
+                pomo = koraki.odstrani()
+            else:
                 return False
+        if vrednosti[pomo[1]][1] == 2:
+            return backtrack()
         else:
-            vrednosti[pomo[1]] = (not vrednosti[pomo[1]][0],2)
             vrednosti[pomo[1]+n*(-1)**(pomo[1]>=n)] = (vrednosti[pomo[1]][0],2)
-            return pomoChaff(pomo[1])
-        return True
+            vrednosti[pomo[1]] = (not vrednosti[pomo[1]][0],2)
+            return pomo[1]
 
     def pomoChaff(b):
         if vrednosti[b] and not vrednosti[b][0]:#izberemo tiste stavke, kjer je literal false (in opazovan)
@@ -302,7 +304,7 @@ def pChaff(formula):
             pommo = True
             for j in izraz[i]:
                 literali[j]+=1
-                if j != b and (not vrednosti[j] or vrednosti[j][0]):
+                if j != b and ((not vrednosti[j]) or vrednosti[j][0]):
                     opazovaneSta[i].append(j)
                     if j in opazovaneSpr.keys():
                         opazovaneSpr[j].add(i)
@@ -310,35 +312,42 @@ def pChaff(formula):
                         opazovaneSpr[j] = {i}
                     pommo = False
                     break
-            if pommo:#Nismo našli nove spr, torej mora biti spr, ki je ostala true. Shranimo si tudi spr., ki je false, saj se bo pri backtrackingu spremenila na true oz. nedefinirano
-                #vemo, da mora biti zadnji literal true
+            if pommo:#Nismo našli nove spr, torej mora biti literal, ki je ostal true. Shranimo si tudi spr., ki je false, saj se bo pri backtrackingu spremenila na true oz. nedefinirano
+                opazovaneSta[i].append(b)
                 if vrednosti[opazovaneSta[i][0]]  and vrednosti[opazovaneSta[i][0]][0] == False:
-                    if not backtrack():
+                    indeks = backtrack()
+                    if not indeks:
                         return False
-                else:
+                    return pomoChaff(indeks)
+                elif not vrednosti[opazovaneSta[i][0]]:
                     vrednosti[opazovaneSta[i][0]] = (True,2)
                     vrednosti[opazovaneSta[i][0]+n*(-1)**(opazovaneSta[i][0]>=n)] = (False,2)
                     koraki.dodaj(("i",opazovaneSta[i][0]))#"i" pomeni, da je spremenljivka implicirana, tj. sledi iz prejšnjih odločitev.
                     pomoChaff(opazovaneSta[i][0])
-                opazovaneSta[i].append(b)
-                print("tutu")
+                else:
+                    pass #to implikacijo/odločitev smo že pohandlali
+                    #raise UsageError("To se ne bi smelo zgoditi.")
         return True
     
     pommmo = True
     stevec = 0
-    while ((not koraki.prazen()) or pommmo) and not izpolnjen():# and type(formula.vstavi(slovar(vrednosti,kazalci)).poenostavi())!=T:#pommmo je zato, da se prvič zanka izvede, potem pa se ne preverja dokler ne pridemo do zadnje iteracije zanke.
-        #Če imajo vse spr. vrednost, ko začnemo novo iteracijo je formula izpolnjiva z izračunano valuacijo.
+    while ((not koraki.prazen()) or pommmo) and not izpolnjen(opazovaneSta, vrednosti):# and type(formula.vstavi(slovar(vrednosti,kazalci)).poenostavi())!=T:#pommmo je zato, da se prvič zanka izvede, potem pa se ne preverja dokler ne pridemo do zadnje iteracije zanke.
+        #Če imajo vse spr. vrednost, ko začnemo novo iteracijo je formula izpolnjiva z izračunano valuacijo. TO NI RES!!
         stevec += 1
         pommmo = False
         if stevec % (10 * n) == 0: #vsake toliko časa delimo s konstanto
             literali = [i/2 for i in literali]#??? Daj v kopico?
         b = izberi(literali)#izbere literal, ki ima največjo vrednost po cca. chaff metodi
-        vrednosti[b] = (True,1)
-        vrednosti[b+n*(-1)**(b>=n)] = (False,2)
-        koraki.dodaj(("d",b))
-        print(opazovaneSta)
-        if not pomoChaff(b):
-            return False
+        if b != None:
+            vrednosti[b] = (True,1)
+            vrednosti[b+n*(-1)**(b>=n)] = (False,2)
+            koraki.dodaj(("d",b))
+            #print(opazovaneSta)
+            if not pomoChaff(b):
+                return False
+        else:
+            #print(formula.vstavi(slovar(vrednosti,kazalci)).poenostavi(),izpolnjen())
+            backtrack()
                     
     if koraki.prazen() and type(formula.vstavi(slovar(vrednosti,kazalci)).poenostavi())!=T:
         return False
@@ -348,10 +357,22 @@ def pChaff(formula):
         
 
 
-
-a = primer(n = 70)
-DPLL(a,True)
-Chaff(a,True)
+for i in range(1000):
+    a = primer(n = 50)
+    print(len(a.spremenljivke()))
+    b = DPLL(a,True)
+    c = Chaff(a,True)
+    if b:
+        d = a.vstavi(b).poenostavi()
+    else:
+        d = a.poenostavi()
+    if c:
+        e = a.vstavi(c).poenostavi()
+    else:
+        e = a.poenostavi()
+    
+    if d != e:
+        print("NE DELAM PRAV!", d, e)
 
 
 

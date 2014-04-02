@@ -74,7 +74,7 @@ class Sklad():
             self.sklad.append(x)
 
     def odstrani(self):
-        if self.prazen:
+        if self.prazen():
             raise UsageError("Ne moramo odstraniti elementov iz praznega sklada.")
         self.head -= 1
         return self.sklad[self.head+1]
