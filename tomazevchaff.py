@@ -61,10 +61,7 @@ def tchaff(formula):
         for lit in stavek.sez:
             literali[lit]=literali.get(lit,0)+1
 
-    print(kontrolni)
-    print()
-    print(kontrolniOd)
-    print()
+    
             
     ################################ POMOŽNE FUNKCIJE ######################################################################
     def ugibaj():
@@ -86,34 +83,39 @@ def tchaff(formula):
             if type(lit)==Spr:
                 x = lit.ime
                 if vrednost[x] == False: return False   #prišlo je do konflikta
-                vrednost[x]=True
-                if Neg(lit) in kontrolniOd: menjaj(Neg(lit))
+                elif vrednost[x] == None:
+                    vrednost[x]=True
+                    if Neg(lit) in kontrolniOd: menjaj(Neg(lit),temp)
             else:
                 x = lit.izr.ime
                 if vrednost[x]: return False    #prišlo je do konflikta
-                vrednost[x]=False
-                if lit in kontrolniOd: menjaj(lit)
+                elif vrednost[x] == None:
+                    vrednost[x]=False
+                    if lit in kontrolniOd: menjaj(lit.izr,temp)
+        return temp
 
-    def menjaj(l):
+    def menjaj(l,temp):
         """kontrolni literal l je treba zamenjati, ker je l nastavljen na False"""
         for stavek in kontrolniOd[l]:
             najden = False
             i=kontrolni[stavek].index(l)
-            for literal in stavek.sez:
-                if literal not in kontrolni[stavek] and vrednost[literal.ime if type(literal)==Spr else literal.izr.ime]!=False:
-                    kontrolni[stavek][i]=literal
-                    if literal in kontrolniOd: kontrolniOd[literal].append(stavek)
-                    else: kontrolniOd[literal]=[stavek]
-                    najden = True
-                    break
-            if not najden:
-                x = kontrolni[stavek][1-i]  #edini ostali kontrolni literal v stavku, ki more dati vrednost True
-                novi.append(x)
-        del kontrolniOd[l]
+            #če stavek še ni izpolnjen
+            if vrednost[kontrolni[stavek][1-i].ime if type(kontrolni[stavek][1-i])==Spr else kontrolni[stavek][1-i].izr.ime]==None:
+                for literal in stavek.sez:
+                    if literal not in kontrolni[stavek] and vrednost[literal.ime if type(literal)==Spr else literal.izr.ime]!=False:
+                        kontrolni[stavek][i]=literal
+                        if literal in kontrolniOd: kontrolniOd[literal].append(stavek)
+                        else: kontrolniOd[literal]=[stavek]
+                        najden = True
+                        kontrolniOd[l].remove(stavek)
+                        break
+                if not najden:
+                    x = kontrolni[stavek][1-i]  #edini ostali kontrolni literal v stavku, ki more dati vrednost True+
+                    temp.append(x)
+        if kontrolniOd[l]==[]: del kontrolniOd[l]
 
-    def resiproblem():
+    def resiproblem(ugibanja):
         """če pride do protislovja pri ugibanju se vrnemo do najkasnejšega ugibanja, ki še ni imelo preverjeni obe možnosti """
-        print("konflikt!")
         i = len(ugibanja)-1
         while proban[ugibanja[i]]==2:
             i-=1
@@ -129,17 +131,21 @@ def tchaff(formula):
             del sklepi[ugibanja[odl]]
             if odl>i:
                 del proban[ugibanja[odl]]
+        naslednji[0] = ugibanja[i]
         ugibanja = ugibanja[:i]
         return False
 
     ##################################################### TEŽKO DELO ############################################################################
     
-    print("primer ni lahek")
     sklepi = {}         #za vsako ugibanje kateri sklepi so sledili
     ugibanja = []       #zaporedje ugibanj
+    naslednji = [False]      #če imamo določeno kaj probamo naslednje (ko pride do konflikta, se vrnemo do zadnje odločitve ne sprobane v obe smeri. S tem določimo da je naslednja na vrsti druga možnost za to ugibanje)
     while True:
-        print(literali)
-        a = ugibaj()
+        if naslednji[0]:
+            a = naslednji[0]
+            naslednji[0]=False
+        else:
+            a = ugibaj()
         if not a:
             return vrednost #vsi literali imajo vrednost
         ugibanja.append(a)
@@ -148,8 +154,9 @@ def tchaff(formula):
         novi = [a]
         while novi:
             novi = sklepaj()
+        print(sklepi)
         if novi==False:     #treba trackat backat
-            if resiproblem(): return "Formula ni izpolnljiva"
+            if resiproblem(ugibanja): return "Formula ni izpolnljiva"
 
 
                 
