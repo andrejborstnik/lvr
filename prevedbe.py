@@ -80,7 +80,7 @@ def sudoku(tabela1):
     imena = [None]*n
     obrimena = {}
     st = 0
-    tabela = tabela1.copy()
+    tabela = tabela1[:]
     for i in range(n):
         for j in range(n):
             if tabela1[i][j] and tabela1[i][j] not in spr:
@@ -116,32 +116,11 @@ def sudoku(tabela1):
     #for i in g: print(i,g[i])
 
     #zamenjamo nazaj imena spremenljivk, namesto številk
-    g = eval(sub(r"([^\(]+?)([0-9]+)([^\)]+?)",r"\1imena[\2-1]\3",str(g)))
-    return barvanje(g,n),n
-
-
-
-###a = sudoku([["Bla",None,None,None],["Kor",None,None,None],["AS",None,None,None],["MA",None,None,None]])
-##a = sudoku([["Bla"]])
-##n = a[1]
-##b = DPLL(a[0])
-##rešitev = [[None]*n]*n
-##barve = [None]*n
-##for i in b.keys():
-##    j = eval(i)
-##    if b[i] and j[0][0] != "(":
-##        barve[j[1]] = j[0]
-##for i in b.keys():
-##    j = eval(i)
-##    if b[i] and j[0][0] == "(":
-##        j = eval(j[0]),j[1]
-##        rešitev[j[0][0]][j[0][1]] = barve[j[1]]
-##
-##print(rešitev)
-
-
+    #g = eval(sub(r"([^\(]+?)([0-9]+)([^\)]+?)",r"\1imena[\2-1]\3",str(g)))
+    return barvanje(g,n)
 
 t = [[0,0,4,0],[0,2,0,3],[2,0,0,0],[0,4,0,1]]
+a = [["Bla",None,None,None],["Kor",None,None,None],["AS",None,None,None],["MA",None,None,None]]
 
 g = {"a":{"b","c","d"},"b":{"a"},"c":{"a"},"d":{"a"}}
 
