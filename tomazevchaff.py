@@ -61,10 +61,7 @@ def tchaff(formula):
         for lit in stavek.sez:
             literali[lit]=literali.get(lit,0)+1
 
-    print(kontrolni)
-    print()
-    print(kontrolniOd)
-    print()
+    
             
     ################################ POMOŽNE FUNKCIJE ######################################################################
     def ugibaj():
@@ -79,22 +76,25 @@ def tchaff(formula):
         """Po ugibanju tranzitivno naredi sklepe, ki iz njega sledijo"""
         temp = []
         for lit in novi:
-            sklepi[a].append(lit)
+            sklepi[a].add(lit)
             literali[lit]*=-1   #frekvenci spremeni predznak, da vemo da je že izbran - zato ga ne izberemo še enkrat
             u = Neg(lit) if type(lit)==Spr else lit.izr
             if u in literali: literali[u]*=-1
             if type(lit)==Spr:
                 x = lit.ime
                 if vrednost[x] == False: return False   #prišlo je do konflikta
-                vrednost[x]=True
-                if Neg(lit) in kontrolniOd: menjaj(Neg(lit))
+                elif vrednost[x] == None:
+                    vrednost[x]=True
+                    if Neg(lit) in kontrolniOd: menjaj(Neg(lit),temp)
             else:
                 x = lit.izr.ime
                 if vrednost[x]: return False    #prišlo je do konflikta
-                vrednost[x]=False
-                if lit in kontrolniOd: menjaj(lit)
+                elif vrednost[x] == None:
+                    vrednost[x]=False
+                    if lit in kontrolniOd: menjaj(lit.izr,temp)
+        return temp
 
-    def menjaj(l):
+    def menjaj(l,temp):
         """kontrolni literal l je treba zamenjati, ker je l nastavljen na False"""
         for stavek in kontrolniOd[l]:
             najden = False
@@ -108,12 +108,11 @@ def tchaff(formula):
                     break
             if not najden:
                 x = kontrolni[stavek][1-i]  #edini ostali kontrolni literal v stavku, ki more dati vrednost True
-                novi.append(x)
+                temp.append(x)
         del kontrolniOd[l]
 
     def resiproblem():
         """če pride do protislovja pri ugibanju se vrnemo do najkasnejšega ugibanja, ki še ni imelo preverjeni obe možnosti """
-        print("konflikt!")
         i = len(ugibanja)-1
         while proban[ugibanja[i]]==2:
             i-=1
@@ -134,17 +133,15 @@ def tchaff(formula):
 
     ##################################################### TEŽKO DELO ############################################################################
     
-    print("primer ni lahek")
     sklepi = {}         #za vsako ugibanje kateri sklepi so sledili
     ugibanja = []       #zaporedje ugibanj
     while True:
-        print(literali)
         a = ugibaj()
         if not a:
             return vrednost #vsi literali imajo vrednost
         ugibanja.append(a)
         proban[a]=proban.get(a,0)+1
-        sklepi[a]=[]
+        sklepi[a]=set()
         novi = [a]
         while novi:
             novi = sklepaj()

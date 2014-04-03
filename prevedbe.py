@@ -36,7 +36,6 @@ def barvanje(g,k):
 
     return formula.poenostavi()
 
-g = {"a":{"d"},"d":{"a"}}
 
 
 def povezanost(g):
@@ -97,16 +96,14 @@ def sudoku(tabela):
                     if x != tabela[i][j]:
                         g[(i,j)].add(x)
                         g[x].add((i,j))
-
-    for i in g: print(i,g[i])
     
     return barvanje(g,n)
 
 
 
+t = [[0,0,4,0],[0,2,0,3],[2,0,0,0],[0,4,0,1]]
 
-
-
+g = {"a":{"b","c","d"},"b":{"a"},"c":{"a"},"d":{"a"}}
 
 
 
