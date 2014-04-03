@@ -1,5 +1,6 @@
 from booli import *
 from solver import *
+from tomazevchaff import *
 
 def barvanje(g,k):
     """Ali lahko graf podan s slovarjem g pobarvamo s k barvami? """
@@ -35,7 +36,7 @@ def barvanje(g,k):
 
     return formula.poenostavi()
 
-g = {"a":{"d"},"b":{"d"},"c":{"d"},"d":{"a","b","c"}}
+g = {"a":{"d"},"d":{"a"}}
 
 
 def povezanost(g):

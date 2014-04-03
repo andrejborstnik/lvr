@@ -349,9 +349,9 @@ def pChaff(formula):
 
 
 
-a = primer(n = 70)
-DPLL(a,True)
-Chaff(a,True)
+#a = primer(n = 70)
+#DPLL(a,True)
+#Chaff(a,True)
 
 
 
