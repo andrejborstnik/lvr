@@ -1,15 +1,16 @@
 from booli import *
 from solver import *
 from tomazevchaff import *
+from re import sub 
 
 def barvanje(g,k):
     """Ali lahko graf podan s slovarjem g pobarvamo s k barvami? """
     def sprem(v,b):
-        return Spr(str(v)+","+str(b))
+        return Spr("\""+str(v)+"\""+","+str(b))
     
     #vsako vozlišče vsaj ene barve
     f1 = In(*tuple(Ali(*tuple(sprem(v,b) for b in range(k))) for v in g))
-
+    
     #vsako vozlišče z ne več kot eno barvo
     f2 = In(
         *tuple(
@@ -72,9 +73,24 @@ def povezanost(g):
     print(In(f1,f2,f3,f4))
     return In(f1,f2,f3,f4).poenostavi()
 
-def sudoku(tabela):
-    n = len(tabela)
+def sudoku(tabela1):
+    n = len(tabela1)
     k = int(n**0.5)
+    #Preslikamo podane spremenljivke sudokuja v [n].
+    spr = set()
+    imena = [None]*n
+    obrimena = {}
+    st = 0
+    tabela = tabela1.copy()
+    for i in range(n):
+        for j in range(n):
+            if tabela1[i][j] and tabela1[i][j] not in spr:
+                imena[st] = tabela1[i][j]
+                obrimena[tabela1[i][j]] = st
+                st+=1
+                spr.add(tabela1[i][j])
+                tabela[i][j] = st
+                
     g = {(i,j):set()  for i in range(n) for j in range(n)}
     for i in range(n):
         for j in range(n):
@@ -83,7 +99,7 @@ def sudoku(tabela):
                 if x != i: g[(i,j)].add((x,j))
                 if (k*(i//k) + x//k, k*(j//k)+x%k)!=(i,j): g[(i,j)].add((k*(i//k) + x//k, k*(j//k)+x%k))
 
-    #barve so 1,2,...,n
+    #barve so 1,...,n
 
     for i in range(1,n+1):
         g[i]=set()
@@ -97,20 +113,32 @@ def sudoku(tabela):
                     if x != tabela[i][j]:
                         g[(i,j)].add(x)
                         g[x].add((i,j))
-
-    for i in g: print(i,g[i])
     
-    return barvanje(g,n)
+    #for i in g: print(i,g[i])
+
+    #zamenjamo nazaj imena spremenljivk, namesto številk
+    g = eval(sub(r"([^\(]+?)([0-9]+)([^\)]+?)",r"\1imena[\2-1]\3",str(g)))
+    return barvanje(g,n),n
 
 
 
-
-
-
-
-
-
-
+###a = sudoku([["Bla",None,None,None],["Kor",None,None,None],["AS",None,None,None],["MA",None,None,None]])
+##a = sudoku([["Bla"]])
+##n = a[1]
+##b = DPLL(a[0])
+##rešitev = [[None]*n]*n
+##barve = [None]*n
+##for i in b.keys():
+##    j = eval(i)
+##    if b[i] and j[0][0] != "(":
+##        barve[j[1]] = j[0]
+##for i in b.keys():
+##    j = eval(i)
+##    if b[i] and j[0][0] == "(":
+##        j = eval(j[0]),j[1]
+##        rešitev[j[0][0]][j[0][1]] = barve[j[1]]
+##
+##print(rešitev)
 
 
 
