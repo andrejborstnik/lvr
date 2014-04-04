@@ -158,7 +158,7 @@ def tchaff(formula):
         if novi==False:     #treba trackat backat
             if resiproblem(ugibanja): return "Formula ni izpolnljiva"
 
-
+primer = In(Ali(Spr("x"),Spr("z")),Ali(Spr("x"),Spr("u")),Ali(Spr("x"),Spr("v")),Ali(Neg(Spr("x")),Neg(Spr("y"))),Ali(Neg(Spr("x")),Spr("y")))
                 
                 
         
