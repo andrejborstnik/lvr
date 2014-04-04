@@ -85,13 +85,13 @@ def tchaff(formula):
                 if vrednost[x] == False: return False   #prišlo je do konflikta
                 elif vrednost[x] == None:
                     vrednost[x]=True
-                    if Neg(lit) in kontrolniOd: menjaj(Neg(lit),temp)
+                    if Neg(lit) in kontrolniOd: temp = menjaj(Neg(lit),temp)
             else:
                 x = lit.izr.ime
                 if vrednost[x]: return False    #prišlo je do konflikta
                 elif vrednost[x] == None:
                     vrednost[x]=False
-                    if lit in kontrolniOd: menjaj(lit.izr,temp)
+                    if lit in kontrolniOd: temp = menjaj(lit.izr,temp)
         return temp
 
     def menjaj(l,temp):
@@ -113,6 +113,7 @@ def tchaff(formula):
                     x = kontrolni[stavek][1-i]  #edini ostali kontrolni literal v stavku, ki more dati vrednost True+
                     temp.append(x)
         if kontrolniOd[l]==[]: del kontrolniOd[l]
+        return temp
 
     def resiproblem(ugibanja):
         """če pride do protislovja pri ugibanju se vrnemo do najkasnejšega ugibanja, ki še ni imelo preverjeni obe možnosti """
@@ -131,7 +132,7 @@ def tchaff(formula):
             del sklepi[ugibanja[odl]]
             if odl>i:
                 del proban[ugibanja[odl]]
-        naslednji[0] = ugibanja[i]
+        naslednji[0] = Neg(ugibanja[i]) if type(ugibanja[i]) == Spr else ugibanja[i].izr
         ugibanja = ugibanja[:i]
         return False
 
