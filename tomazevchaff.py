@@ -2,6 +2,7 @@ from util import *
 from booli import *
 from time import *
 from random import *
+from prevedbe import *
 
 
 def tchaff(formula):
@@ -72,7 +73,7 @@ def tchaff(formula):
         else:
             return y
         
-    def sklepaj():
+    def sklepaj(novi):
         """Po ugibanju tranzitivno naredi sklepe, ki iz njega sledijo"""
         temp = []
         for lit in novi:
@@ -118,7 +119,7 @@ def tchaff(formula):
     def resiproblem(ugibanja):
         """če pride do protislovja pri ugibanju se vrnemo do najkasnejšega ugibanja, ki še ni imelo preverjeni obe možnosti """
         i = len(ugibanja)-1
-        while proban[ugibanja[i]]==2:
+        while proban[ugibanja[i] if type(ugibanja[i]) == Spr else ugibanja[i].izr]==2:
             i-=1
             if i<0: return True #vse možnosti že sprobane
 
@@ -150,12 +151,12 @@ def tchaff(formula):
         if not a:
             return vrednost #vsi literali imajo vrednost
         ugibanja.append(a)
-        proban[a]=proban.get(a,0)+1
+        b = a if type(a)== Spr else a.izr
+        proban[b]=proban.get(b,0)+1
         sklepi[a]=[]
         novi = [a]
         while novi:
-            novi = sklepaj()
-        print(sklepi)
+            novi = sklepaj(novi)
         if novi==False:     #treba trackat backat
             if resiproblem(ugibanja): return "Formula ni izpolnljiva"
 
