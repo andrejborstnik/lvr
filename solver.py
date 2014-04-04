@@ -55,8 +55,8 @@ def DPLL(formula,cas = False):
     t2 = clock()
     if cas:
         print("Čas za izračun:  {0}".format(t2-t1))
-    print("Rešitev: \n{0}".format(a))
-    return a
+    #print("Rešitev: \n{0}".format(a))
+    return a,(t2-t1)
 
 def DPLLpomo(formula,vrednosti = {}):
     #formula mora biti v cnf obliki. Če ni, jo v to spremenimo
@@ -353,28 +353,6 @@ def pChaff(formula):
         return False
     
     return slovar(vrednosti,kazalci)
-        
-        
-
-
-def test():
-    for i in range(1000):
-        a = primer(n = 50)
-        print(len(a.spremenljivke()))
-        b = DPLL(a,True)
-        c = Chaff(a,True)
-        if b:
-            d = a.vstavi(b).poenostavi()
-        else:
-            d = a.poenostavi()
-        if c:
-            e = a.vstavi(c).poenostavi()
-        else:
-            e = a.poenostavi()
-        
-        if d != e:
-            print("NE DELAM PRAV!", d, e)
-
 
 
 

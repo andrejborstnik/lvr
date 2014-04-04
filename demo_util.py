@@ -1,16 +1,17 @@
 from prevedbe import *
 from util import *
+from tomazevchaff import tchaff
 from os import path
 #a = sudoku([["Bla",None,None,None],["Kor",None,None,None],["AS",None,None,None],["MA",None,None,None]])
 
-def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver = "DPLL", izpis_output_file=""):
+def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver = "tchaff", izpis_output_file=""):
     """ v datoteki pričakuje sudoku v formatu (primer 2x2):
     # a,b \n
     # c,d \n
     , kjer so lahko a,b,c in d poljubni neprazni nizi oz. števila, razen 0.
      0, \prazno in None so rezervirani za prazno polje.
      V podani datoteki naj bo samo en sudoku in naj ne bo praznih vrstic."""
-    if solver not in ["DPLL","Chaff","bfSAT"]:
+    if solver not in ["DPLL","Chaff","bfSAT", "tchaff"]:
         raise UsageError("Podali ste solver, ki ni implementiran! (ali pa ste se zatipkali)")
     if not tabela:
         if not input_file:
@@ -27,7 +28,7 @@ def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver =
                 k+=1
         vrstice=vrstice[:k]
         n = k-1
-        print(n)
+        #print(n)
         if "," in file:
             locilo = ","
         elif ";" in file:
@@ -44,7 +45,7 @@ def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver =
             if len(k)!=n:
                 raise UsageError("{0}. vrstica v datoteki ima premalo/preveč elementov.".format(i+1))
             tabela[i] = k
-        print(tabela)
+        #print(tabela)
         f.close()
 
 ##        except:
@@ -55,7 +56,7 @@ def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver =
     k = int(n**0.5)
     if k*k !=n:
         raise UsageError("Podana tabela ne predstavlja sudokuja, saj dolžina stranice ni popoln kvadrat!")
-    print(sudoku(tabela))
+    #print(sudoku(tabela))
     res = eval(solver+"(sudoku(tabela))")
     #za to si rabimo nekje zapomnit imena
     #res = eval(sub(r"([^\(]+?)([0-9]+)([^\)]+?)",r"\1imena[\2-1]\3",str(res))
@@ -141,4 +142,42 @@ def prikazi(resitev,file=False):
     if not file:
         print("\nRešeni sudoku:  \n")
         print(file1)
+        return None
     return file1
+
+
+def test(k,velikost = 70):
+    t1 = 0
+    t2 = 0
+    for i in range(k):
+        a = primer(n = velikost)
+        print(len(a.spremenljivke()))
+        b,t1a = DPLL(a,True)
+        c,t2a = tchaff(a,True)
+        t1+=t1a
+        t2+=t2a
+        if b:
+            d = a.vstavi(b).poenostavi()
+        else:
+            d = a.poenostavi()
+        if c:
+            if type(c)!= str:
+                e = a.vstavi(c).poenostavi()
+            else:
+                e = F()
+        else:
+            e = a.poenostavi()
+        
+        if d != e:
+            print("NE DELAM PRAV!", d, e)
+            print("Časa: {0}, {1}".format(t1,t2))
+            print(a)
+            break
+    print("Časa: {0}, {1}".format(t1,t2))
+    return None
+
+
+#Rezultati testiranja:
+#tchaff je porabil 0.42 časa DPLL na velikosti 70, pri 100 ponovitvah
+#0.59, 100, 10
+#0.34, 100, 50

@@ -2,10 +2,15 @@ from util import *
 from booli import *
 from time import *
 from random import *
-from prevedbe import *
+def tchaff(formula, time = False):
+    t = clock()
+    a = ptchaff(formula)
+    t1 = clock()
+    if time:
+        print(t1-t)
+    return a,t1-t
 
-
-def tchaff(formula):
+def ptchaff(formula):
 
     ########################## ZAČETNO ČIŠČENJE ####################################################
     
@@ -14,8 +19,8 @@ def tchaff(formula):
 
     if type(form)==T: return vrednost
     elif type(form)==F: return "Formula ni izpolnljiva"
-
-    
+    elif type(form)==Neg: vrednost[i.izr.ime] = False; return vrednost
+    elif type(form)==Spr: vrednost[i.ime] = True; return vrednost
 
     #Najprej določimo vrednost enojcem
     nove = True
@@ -87,12 +92,15 @@ def tchaff(formula):
                 elif vrednost[x] == None:
                     vrednost[x]=True
                     if Neg(lit) in kontrolniOd: temp = menjaj(Neg(lit),temp)
-            else:
+            elif type(lit)==Neg:
                 x = lit.izr.ime
                 if vrednost[x]: return False    #prišlo je do konflikta
                 elif vrednost[x] == None:
                     vrednost[x]=False
-                    if lit in kontrolniOd: temp = menjaj(lit.izr,temp)
+                    if lit.izr in kontrolniOd: temp = menjaj(lit.izr,temp)
+            else:
+                raise InternalError("Formula je v napačnem formatu.")
+
         return temp
 
     def menjaj(l,temp):
@@ -121,9 +129,12 @@ def tchaff(formula):
         i = len(ugibanja)-1
         while proban[ugibanja[i] if type(ugibanja[i]) == Spr else ugibanja[i].izr]==2:
             i-=1
-            if i<0: return True #vse možnosti že sprobane
-
+            if i<0: return "korenček" #vse možnosti že sprobane
+        #print(ugibanja)
+        #print(sklepi)
         for odl in range(i,len(ugibanja)):
+            #print("")
+            #print(ugibanja[odl])
             for lit in sklepi[ugibanja[odl]]:
                 #ponovno bo lahko izbran za ugibanje
                 literali[lit]*=-1   
@@ -131,11 +142,12 @@ def tchaff(formula):
                 if u in literali: literali[u]*=-1
                 vrednost[lit.ime if type(lit)==Spr else lit.izr.ime] = None
             del sklepi[ugibanja[odl]]
+            #print(sklepi)
             if odl>i:
                 del proban[ugibanja[odl]]
         naslednji[0] = Neg(ugibanja[i]) if type(ugibanja[i]) == Spr else ugibanja[i].izr
         ugibanja = ugibanja[:i]
-        return False
+        return ugibanja
 
     ##################################################### TEŽKO DELO ############################################################################
     
@@ -158,7 +170,8 @@ def tchaff(formula):
         while novi:
             novi = sklepaj(novi)
         if novi==False:     #treba trackat backat
-            if resiproblem(ugibanja): return "Formula ni izpolnljiva"
+            ugibanja = resiproblem(ugibanja)
+            if ugibanja == "korenček": return "Formula ni izpolnljiva"
 
 primer = In(Ali(Spr("x"),Spr("z")),Ali(Spr("x"),Spr("u")),Ali(Spr("x"),Spr("v")),Ali(Neg(Spr("x")),Neg(Spr("y"))),Ali(Neg(Spr("x")),Spr("y")))
                 
