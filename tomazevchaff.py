@@ -49,6 +49,7 @@ def ptchaff(formula):
     kontrolni = {}                                          #za vsak stavek kateri literali so v njem kontrolni
     kontrolniOd = {}                                        #za kontrolne literale pove za katere stavke so kontrolni
     literali = {}                                           #za vsak literal iz formule pove kako pogost je
+    vzrok = {}                                              #kaj je pripeljalo do sklepa
     
 
     #izberemo kontrolne literale
@@ -76,6 +77,7 @@ def ptchaff(formula):
         if literali[y]<=0:
             return None
         else:
+            vzrok[y] = []
             return y
         
     def sklepaj(novi):
@@ -121,6 +123,7 @@ def ptchaff(formula):
                 if not najden:
                     x = kontrolni[stavek][1-i]  #edini ostali kontrolni literal v stavku, ki more dati vrednost True+
                     temp.append(x)
+                    vzrok[x] = [t for t in stavek.sez if t!=x]
         if kontrolniOd[l]==[]: del kontrolniOd[l]
         return temp
 
@@ -141,6 +144,7 @@ def ptchaff(formula):
                 u = Neg(lit) if type(lit)==Spr else lit.izr
                 if u in literali: literali[u]*=-1
                 vrednost[lit.ime if type(lit)==Spr else lit.izr.ime] = None
+                del vzrok[lit]
             del sklepi[ugibanja[odl]]
             #print(sklepi)
             if odl>i:
@@ -148,6 +152,25 @@ def ptchaff(formula):
         naslednji[0] = Neg(ugibanja[i]) if type(ugibanja[i]) == Spr else ugibanja[i].izr
         ugibanja = ugibanja[:i]
         return ugibanja
+
+    def konstavek(lit):
+        """vrne nov stavek, ki prepreči ponavljanje iste napake """
+        nabor = vzrok[lit]+vzrok[Neg(lit) if type(lit)==Spr else lit.izr]
+        c= True
+        while c:
+            print(nabor)
+            c = False
+            temp = []
+            for x in nabor:
+                a=vzrok[Neg(x) if type(x)==Spr else x.izr]
+                if a:
+                    c = True
+                    temp+= a
+                else:
+                    temp.append(x)
+            nabor = temp
+        return Ali(*tuple(nabor))
+        
 
     ##################################################### TEŽKO DELO ############################################################################
     
@@ -157,6 +180,7 @@ def ptchaff(formula):
     while True:
         if naslednji[0]:
             a = naslednji[0]
+            vzrok[a]=[]
             naslednji[0]=False
         else:
             a = ugibaj()
@@ -169,6 +193,7 @@ def ptchaff(formula):
         novi = [a]
         while novi:
             novi = sklepaj(novi)
+            
         if novi==False:     #treba trackat backat
             ugibanja = resiproblem(ugibanja)
             if ugibanja == "korenček": return "Formula ni izpolnljiva"
