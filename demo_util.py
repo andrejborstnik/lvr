@@ -176,6 +176,25 @@ def test(k,velikost = 70):
     print("Časa: {0}, {1}".format(t1,t2))
     return None
 
+def izp():
+    izpisi = input("Ali naj sudoku lepo izpišem?  ")
+    if izpisi and izpisi in "DAdaDaJAjaJaYESYesyes":
+        izpisi = True
+    elif izpisi in "NEneNeNOnoNo":
+        izpisi = False
+    else:
+        print("Zal te nisem razumel, prosim poizkusi ponovno!")
+        return izp()
+    return izpisi
+
+def sol():
+    solver = input("S katerim algoritmom zelite reševati problem?  ")
+    if not solver:
+        solver = "tchaff"
+    elif solver not in ["DPLL","tchaff","bfSAT"]:
+        print("Algoritma \"{0}\" zal nismo implementirali. Prosim, vnesite drug algoritem.".format(solver))
+        return sol()
+    return solver
 
 #Rezultati testiranja:
 #tchaff je porabil 0.42 časa DPLL na velikosti 70, pri 100 ponovitvah

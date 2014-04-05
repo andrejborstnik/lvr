@@ -8,7 +8,7 @@ def tchaff(formula, time = False):
     t1 = clock()
     if time:
         print(t1-t)
-    return a,t1-t
+    return a
 
 def ptchaff(formula):
 
