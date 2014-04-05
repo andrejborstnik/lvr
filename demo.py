@@ -9,23 +9,22 @@ def demoo():
     print("DEMONSTRACIJA UPORABE: reševanje sudokuja\n")
 
     print("Navodila za uporabo:")
-    print("Sudoku podamo kot tabelo tabel, ali pa kot ustrezen format v datoteki."+
+    print("Sudoku podamo kot tabelo tabel, ali pa kot ustrezen format v datoteki (glej primer.sud)."+
           " V zadnjem primeru pustimo tabelo prazno."+
           " Elementi so lahko katerikoli znaki (ki ne motijo programa samega), razen 0 in None."+
           " Ti dve oznaki sta rezervirani za prazno polje. "+
           "Lahko si izberemo (možnosti se ne izključujejo), da se sudoku lepo izpiše,"+
           " se v ustreznem formatu zapiše v datoteko, ali pa se lepo izpiše v datoteko."+
+          " Opomba: podana datoteka mora obstajati, sicer se algoritem ne bo izvedel."
           " Prav tako si lahko izberemo, s katerim algoritmom bomo reševali problem. Trenutno so na voljo"+
-          " naslednji algoritni: DPLL, tchaff in bfSAT.")
+          " naslednji algoritni: DPLL, tchaff in bfSAT. ")
 
     print("\n")
 
     cas1 = 3
     cas2 = 0.5
 
-    dem = input("Ali želite demonstracijo?  ")
-    if dem and dem in "DAdaDaJAjaJaYESYesyes": dem = True
-    else: dem = False
+    dem = de()
 
 
 
@@ -50,6 +49,9 @@ def demoo():
         #resi_sudoku(tabela,input_file,izpisi,output_file,solver,izpis_output_file)
         print("")
 
+        print("Naloga:  \n")
+        prikazi(tabela)
+        print("\nRešeni sudoku:  \n")
         resi_sudoku(tabela = [[None]], izpisi = True, solver = "DPLL")
 
         print("Poizkusite še sami!\n")
@@ -75,8 +77,8 @@ def demoo():
             break
         except:
             print("\nUnexpected error:", sys.exc_info()[0])
-            print("Prosiva, da poročate o okoliščinah, pri katerih je prišlo do te napake.\n Hvala!\n")
-            continue
+            print("Prosiva, da poročate o okoliščinah, pri katerih je prišlo do te napake.\nHvala!\n")
+            raise
     return None 
     
 

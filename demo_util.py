@@ -11,6 +11,8 @@ def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver =
     , kjer so lahko a,b,c in d poljubni neprazni nizi oz. števila, razen 0.
      0, \prazno in None so rezervirani za prazno polje.
      V podani datoteki naj bo samo en sudoku in naj ne bo praznih vrstic."""
+    if type(tabela)!= list:
+        raise UsageError("Podan \"sudoku\" ni tabela.")
     if solver not in ["DPLL","Chaff","bfSAT", "tchaff"]:
         raise UsageError("Podali ste solver, ki ni implementiran! (ali pa ste se zatipkali)")
     if not tabela:
@@ -57,9 +59,18 @@ def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver =
     if k*k !=n:
         raise UsageError("Podana tabela ne predstavlja sudokuja, saj dolžina stranice ni popoln kvadrat!")
     #print(sudoku(tabela))
+    for i in range(n):
+        if len(tabela[i])!=n:
+            raise UsageError("{0}. vrstica v \"sudokuju\" ima premalo/preveč elementov.".format(i+1))
+        elif type(tabela[i])!=list:
+            raise UsageError("{0}. \"vrstica\" v \"sudokuju\" ni tabela.".format(i+1))
+    if izpisi: print("\nNaloga:\n");prikazi(tabela);print("\nRešeni sudoku:  \n")
     res = eval(solver+"(sudoku(tabela))")
     #za to si rabimo nekje zapomnit imena
     #res = eval(sub(r"([^\(]+?)([0-9]+)([^\)]+?)",r"\1imena[\2-1]\3",str(res))
+    if res == "Formula ni izpolnljiva":
+        print("Rešitev problema ne obstaja!")
+        return None
     resitev = resit(res,n)
     if izpisi:
         prikazi(resitev)
@@ -85,7 +96,7 @@ def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver =
     return None
 
 def resit(rezultat,n):
-    resitev = [[None]*n]*n
+    resitev = [[None]*n for j in range(n)]
     barve = [None]*n
     for i in rezultat.keys():
         j = eval(i)
@@ -100,9 +111,17 @@ def resit(rezultat,n):
 
 def prikazi(resitev,file=False):
     #pravilno deluje samo za sudokuje (dolžina tabele mora biti pravilen kvadrat)
+    if type(resitev)!= list:
+        raise UsageError("Podan \"sudoku\" ni tabela.")
     n = len(resitev)
     k = int(n**0.5)
     file1=""
+
+    for i in range(n):
+        if len(resitev[i])!=n:
+            raise UsageError("{0}. vrstica v \"sudokuju\" ima premalo/preveč elementov.".format(i+1))
+        elif type(resitev[i])!=list:
+            raise UsageError("{0}. \"vrstica\" v \"sudokuju\" ni tabela.".format(i+1))
 
     naj = ""
     for i in resitev:
@@ -140,7 +159,7 @@ def prikazi(resitev,file=False):
         else:
             file1+=pomo1+"\n"
     if not file:
-        print("\nRešeni sudoku:  \n")
+        #print("\nRešeni sudoku:  \n")
         print(file1)
         return None
     return file1
@@ -177,10 +196,10 @@ def test(k,velikost = 70):
     return None
 
 def izp():
-    izpisi = input("Ali naj sudoku lepo izpišem?  ")
+    izpisi = input("Ali naj sudoku lepo izpišem? (da/ne)  ")
     if izpisi and izpisi in "DAdaDaJAjaJaYESYesyes":
         izpisi = True
-    elif izpisi in "NEneNeNOnoNo":
+    elif izpisi and izpisi in "NEneNeNOnoNo":
         izpisi = False
     else:
         print("Zal te nisem razumel, prosim poizkusi ponovno!")
@@ -196,6 +215,12 @@ def sol():
         return sol()
     return solver
 
+def de():
+    dem = input("Ali želite demonstracijo? (da/ne)  ")
+    if dem and dem in "DAdaDaJAjaJaYESYesyesSevedaseveda": dem = True
+    elif dem and dem in "NEneNeNOnoNoNikakornikakornikdarNikdarNikolinikoli": dem = False
+    else: return de()
+    return dem
 #Rezultati testiranja:
 #tchaff je porabil 0.42 časa DPLL na velikosti 70, pri 100 ponovitvah
 #0.59, 100, 10

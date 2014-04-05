@@ -81,14 +81,15 @@ def sudoku(tabela1):
     imena = [None]*n
     obrimena = {}
     st = 0
-    tabela = [[j for j in i] for i in tabela1]
+    tabela = [[j if j not in ["0","None"] else 0 for j in i] for i in tabela1]
     for i in range(n):
         for j in range(n):
-            if tabela1[i][j] and tabela[i][j] not in spr:
+            if tabela[i][j] not in [0, "0","None"] and tabela[i][j] not in spr:
                 imena[st] = tabela[i][j]
                 obrimena[tabela[i][j]] = st
                 st+=1
                 spr.add(tabela[i][j])
+    
                 
     g = {(i,j):set()  for i in range(n) for j in range(n)}
     for i in range(n):
@@ -107,9 +108,9 @@ def sudoku(tabela1):
 
     for i in range(n):
         for j in range(n):
-            if tabela[i][j]:
+            if tabela[i][j] not in [0, "0","None"]:
                 for x in range(1,n+1):
-                    if x != tabela[i][j]:
+                    if x != obrimena[tabela[i][j]]+1:
                         g[(i,j)].add(x)
                         g[x].add((i,j))
     
