@@ -1,7 +1,8 @@
 from booli import *
 from solver import *
 from tomazevchaff import *
-from re import sub 
+from re import sub
+from util import primer
 
 def barvanje(g,k):
     """Ali lahko graf podan s slovarjem g pobarvamo s k barvami? """
@@ -80,15 +81,14 @@ def sudoku(tabela1):
     imena = [None]*n
     obrimena = {}
     st = 0
-    tabela = tabela1[:]
+    tabela = [[j for j in i] for i in tabela1]
     for i in range(n):
         for j in range(n):
-            if tabela1[i][j] and tabela1[i][j] not in spr:
-                imena[st] = tabela1[i][j]
-                obrimena[tabela1[i][j]] = st
+            if tabela1[i][j] and tabela[i][j] not in spr:
+                imena[st] = tabela[i][j]
+                obrimena[tabela[i][j]] = st
                 st+=1
-                spr.add(tabela1[i][j])
-                tabela[i][j] = st
+                spr.add(tabela[i][j])
                 
     g = {(i,j):set()  for i in range(n) for j in range(n)}
     for i in range(n):
@@ -123,8 +123,6 @@ t = [[0,0,4,0],[0,2,0,3],[2,0,0,0],[0,4,0,1]]
 a = [["Bla",None,None,None],["Kor",None,None,None],["AS",None,None,None],["MA",None,None,None]]
 
 g = {"a":{"b","c","d"},"b":{"a"},"c":{"a"},"d":{"a"}}
-
-
 
 
 

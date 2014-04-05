@@ -2,6 +2,8 @@ from util import *
 from booli import *
 from time import *
 from random import *
+
+
 def tchaff(formula, time = False):
     t = clock()
     a = ptchaff(formula)
@@ -84,7 +86,7 @@ def ptchaff(formula):
         """Po ugibanju tranzitivno naredi sklepe, ki iz njega sledijo"""
         temp = []
         for lit in novi:
-            sklepi[a].append(lit)
+            sklepi[a].add(lit)
             literali[lit]*=-1   #frekvenci spremeni predznak, da vemo da je že izbran - zato ga ne izberemo še enkrat
             u = Neg(lit) if type(lit)==Spr else lit.izr
             if u in literali: literali[u]*=-1
@@ -158,7 +160,6 @@ def ptchaff(formula):
         nabor = vzrok[lit]+vzrok[Neg(lit) if type(lit)==Spr else lit.izr]
         c= True
         while c:
-            print(nabor)
             c = False
             temp = []
             for x in nabor:
@@ -174,9 +175,9 @@ def ptchaff(formula):
 
     ##################################################### TEŽKO DELO ############################################################################
     
-    sklepi = {}         #za vsako ugibanje kateri sklepi so sledili
-    ugibanja = []       #zaporedje ugibanj
-    naslednji = [False]      #če imamo določeno kaj probamo naslednje (ko pride do konflikta, se vrnemo do zadnje odločitve ne sprobane v obe smeri. S tem določimo da je naslednja na vrsti druga možnost za to ugibanje)
+    sklepi = {}             #za vsako ugibanje kateri sklepi so sledili
+    ugibanja = []           #zaporedje ugibanj
+    naslednji = [False]     #če imamo določeno kaj probamo naslednje (ko pride do konflikta, se vrnemo do zadnje odločitve ne sprobane v obe smeri. S tem določimo da je naslednja na vrsti druga možnost za to ugibanje)
     while True:
         if naslednji[0]:
             a = naslednji[0]
@@ -189,15 +190,16 @@ def ptchaff(formula):
         ugibanja.append(a)
         b = a if type(a)== Spr else a.izr
         proban[b]=proban.get(b,0)+1
-        sklepi[a]=[]
+        sklepi[a]=set()
         novi = [a]
         while novi:
             novi = sklepaj(novi)
-            
+
+        #print(len(sklepi[a]),len(set(sklepi[a])))
         if novi==False:     #treba trackat backat
             ugibanja = resiproblem(ugibanja)
             if ugibanja == "korenček": return "Formula ni izpolnljiva"
-
+    
 primer = In(Ali(Spr("x"),Spr("z")),Ali(Spr("x"),Spr("u")),Ali(Spr("x"),Spr("v")),Ali(Neg(Spr("x")),Neg(Spr("y"))),Ali(Neg(Spr("x")),Spr("y")))
                 
                 
