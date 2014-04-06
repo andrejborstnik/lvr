@@ -1,6 +1,7 @@
 from prevedbe import *
 from util import *
 from tomazevchaff import tchaff
+from re import sub
 from os import path
 #a = sudoku([["Bla",None,None,None],["Kor",None,None,None],["AS",None,None,None],["MA",None,None,None]])
 
@@ -99,6 +100,7 @@ def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver =
 def resit(rezultat,n):
     resitev = [[None]*n for j in range(n)]
     barve = [None]*n
+    rezultat = eval(sub(r"(\")+",r"\"",str(rezultat)))
     for i in rezultat.keys():
         j = eval(i)
         if rezultat[i] and j[0][0] != "(":
@@ -203,7 +205,7 @@ def izp():
     elif izpisi and izpisi in "NEneNeNOnoNo":
         izpisi = False
     else:
-        print("Zal te nisem razumel, prosim poizkusi ponovno!")
+        print("Žal te nisem razumel, prosim poizkusi ponovno!")
         return izp()
     return izpisi
 
@@ -212,7 +214,7 @@ def sol():
     if not solver:
         solver = "tchaff"
     elif solver not in ["DPLL","tchaff","bfSAT"]:
-        print("Algoritma \"{0}\" zal nismo implementirali. Prosim, vnesite drug algoritem.".format(solver))
+        print("Algoritma \"{0}\" žal (še) nismo implementirali. Prosim, vnesite drug algoritem.".format(solver))
         return sol()
     return solver
 
@@ -220,7 +222,7 @@ def de():
     dem = input("Ali želite demonstracijo? (da/ne)  ")
     if dem and dem in "DAdaDaJAjaJaYESYesyesSevedaseveda": dem = True
     elif dem and dem in "NEneNeNOnoNoNikakornikakornikdarNikdarNikolinikoli": dem = False
-    else: return de()
+    else: print("Žal te nisem razumel, prosim poizkusi ponovno!");return de()
     return dem
 #Rezultati testiranja:
 #tchaff je porabil 0.42 časa DPLL na velikosti 70, pri 100 ponovitvah

@@ -117,7 +117,7 @@ def sudoku(tabela1):
     #for i in g: print(i,g[i])
 
     #zamenjamo nazaj imena spremenljivk, namesto številk
-    #g = eval(sub(r"([^\(]+?)([0-9]+)([^\)]+?)",r"\1imena[\2-1]\3",str(g)))
+    g = eval(sub(r"([^\(]+?)([0-9]+)([^\)]+?)",r"\1imena[\2-1]\3",str(g)))
     return barvanje(g,n)
 
 t = [[0,0,4,0],[0,2,0,3],[2,0,0,0],[0,4,0,1]]
