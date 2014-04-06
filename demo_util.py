@@ -64,7 +64,7 @@ def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver =
             raise UsageError("{0}. vrstica v \"sudokuju\" ima premalo/preveč elementov.".format(i+1))
         elif type(tabela[i])!=list:
             raise UsageError("{0}. \"vrstica\" v \"sudokuju\" ni tabela.".format(i+1))
-    if izpisi: print("\nNaloga:\n");prikazi(tabela);print("\nRešeni sudoku:  \n")
+    if izpisi: print("\nNaloga:\n");prikazi(tabela);print("\ndelam...  \n")
     res = eval(solver+"(sudoku(tabela))")
     #za to si rabimo nekje zapomnit imena
     #res = eval(sub(r"([^\(]+?)([0-9]+)([^\)]+?)",r"\1imena[\2-1]\3",str(res))
@@ -73,6 +73,7 @@ def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver =
         return None
     resitev = resit(res,n)
     if izpisi:
+        print("\nRešeni sudoku:  \n")
         prikazi(resitev)
     if output_file:
         if not path.isfile(output_file):

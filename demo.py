@@ -50,7 +50,6 @@ def demoo():
         print("")
 
         print("Naloga:  \n")
-        prikazi(tabela)
         print("\nRešeni sudoku:  \n")
         resi_sudoku(tabela = [[None]], izpisi = True, solver = "DPLL")
 
