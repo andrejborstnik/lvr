@@ -73,6 +73,41 @@ def povezanost(g):
     print(In(f1,f2,f3,f4))
     return In(f1,f2,f3,f4).poenostavi()
 
+def sudoku1(tabela1):
+    #v poenostavljeni obliki je formula majhna, vendar je v cnf ogromna.
+    n = len(tabela1)
+    k = int(n**0.5)
+    def Sprem(u,v,n):
+        return Spr("C,{0},{1},{2}".format(u,v,n))
+
+    spr = set()
+    imena = [None]*n
+    obrimena = {}
+    st = 0
+    tabela = [[j if j not in ["0","None"] else 0 for j in i] for i in tabela1]
+    for i in range(n):
+        for j in range(n):
+            if tabela[i][j] not in [0, "0","None",None] and tabela[i][j] not in spr:
+                imena[st] = tabela[i][j]
+                obrimena[tabela[i][j]] = st
+                st+=1
+                spr.add(tabela[i][j])
+
+    f = [0]*(3*n)
+    for i in range(n):
+        #vrstice. nobena dva nimata enake vrednosti
+        f[i] = In(*tuple(Ali(*tuple(In(Sprem(i,j,l),*tuple(Neg(Sprem(i,z,l))if z!=j else T() for z in range(n))) for l in range(1,n+1))) for j in range(n)))
+
+        #stoplci
+        f[i+n] = In(*tuple(Ali(*tuple(In(Sprem(j,i,l),*tuple(Neg(Sprem(z,i,l))if z!=j else T() for z in range(n))) for l in range(1,n+1))) for j in range(n)))
+
+        #kvadratki
+        a = i//k
+        b = i%k
+        f[i+2*n] = In(*tuple(Ali(*tuple(In(Sprem(a+j//k,b+j%k,l),*tuple(Neg(Sprem(a+z//k,b+z%k,l))if z!=j else T() for z in range(n))) for l in range(1,n+1))) for j in range(n)))
+            
+    return In(*tuple(i for i in f)).poenostavi()
+
 def sudoku(tabela1):
     n = len(tabela1)
     k = int(n**0.5)
@@ -81,10 +116,10 @@ def sudoku(tabela1):
     imena = [None]*n
     obrimena = {}
     st = 0
-    tabela = [[j if j not in ["0","None"] else 0 for j in i] for i in tabela1]
+    tabela = [[j if j not in ["0","None", None] else 0 for j in i] for i in tabela1]
     for i in range(n):
         for j in range(n):
-            if tabela[i][j] not in [0, "0","None"] and tabela[i][j] not in spr:
+            if tabela[i][j] not in [0, "0","None",None] and tabela[i][j] not in spr:
                 imena[st] = tabela[i][j]
                 obrimena[tabela[i][j]] = st
                 st+=1
@@ -108,7 +143,7 @@ def sudoku(tabela1):
 
     for i in range(n):
         for j in range(n):
-            if tabela[i][j] not in [0, "0","None"]:
+            if tabela[i][j] not in [0, "0","None", None]:
                 for x in range(1,n+1):
                     if x != obrimena[tabela[i][j]]+1:
                         g[(i,j)].add(x)
@@ -121,7 +156,7 @@ def sudoku(tabela1):
     return barvanje(g,n)
 
 t = [[0,0,4,0],[0,2,0,3],[2,0,0,0],[0,4,0,1]]
-a = [["Bla",None,None,None],["Kor",None,None,None],["AS",None,None,None],["MA",None,None,None]]
+#a = [["Bla",None,None,None],["Kor",None,None,None],["AS",None,None,None],["MA",None,None,None]]
 
 g = {"a":{"b","c","d"},"b":{"a"},"c":{"a"},"d":{"a"}}
 

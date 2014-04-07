@@ -48,11 +48,11 @@ def demoo():
             #resi_sudoku(tabela,input_file,izpisi,output_file,solver,izpis_output_file)
             print("")
 
-            print("Naloga:  \n")
-            print("\nRešeni sudoku:  \n")
+            #print("Naloga:  \n")
+            #print("\nRešeni sudoku:  \n")
             resi_sudoku(tabela = [[None]], izpisi = True, solver = "DPLL")
 
-            print("Poizkusite še sami!\n")
+            print("\nPoizkusite še sami!\n")
         else:
             print("\nPreskočili ste demonstracijo!\n")
     except (KeyboardInterrupt, EOFError):
@@ -79,7 +79,7 @@ def demoo():
         except:
             print("\nUnexpected error:", sys.exc_info()[0])
             print("Prosiva, da poročate o okoliščinah, pri katerih je prišlo do te napake.\nHvala!\n")
-            continue
+            raise
     return None
 demoo()
     

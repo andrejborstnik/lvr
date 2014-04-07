@@ -21,8 +21,8 @@ def ptchaff(formula):
 
     if type(form)==T: return vrednost
     elif type(form)==F: return "Formula ni izpolnljiva"
-    elif type(form)==Neg: vrednost[i.izr.ime] = False; return vrednost
-    elif type(form)==Spr: vrednost[i.ime] = True; return vrednost
+    elif type(form)==Neg: vrednost[form.izr.ime] = False; return vrednost
+    elif type(form)==Spr: vrednost[form.ime] = True; return vrednost
 
     #Najprej določimo vrednost enojcem
     nove = True

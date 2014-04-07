@@ -126,6 +126,12 @@ def prikazi(resitev,file=False):
         elif type(resitev[i])!=list:
             raise UsageError("{0}. \"vrstica\" v \"sudokuju\" ni tabela.".format(i+1))
 
+    for i in range(n):
+        for j in range(n):
+            if resitev[i][j] in ["0","None",0]:
+                resitev[i][j] = 0
+    resitev = eval(sub(r"[\"\']{2,}",r"'",str(resitev)))
+
     naj = ""
     for i in resitev:
         for j in i:
