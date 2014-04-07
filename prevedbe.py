@@ -4,6 +4,8 @@ from tomazevchaff import *
 from re import sub
 from util import primer
 
+t = [[0,0,4,0],[0,2,0,3],[2,0,0,0],[0,4,0,1]]
+
 def barvanje(g,k):
     """Ali lahko graf podan s slovarjem g pobarvamo s k barvami? """
     def sprem(v,b):
@@ -74,6 +76,50 @@ def povezanost(g):
     return In(f1,f2,f3,f4).poenostavi()
 
 def sudoku1(tabela1):
+    #boljša prevedba sudoku na sat
+    n = len(tabela1)
+    k = int(n**0.5)
+    def Sprem(u,v,n):
+        return Spr("C({0},{1},{2})".format(u,v,n))
+
+    spr = set()
+    imena = [None]*n
+    obrimena = {}
+    st = 0
+    tabela = [[j if j not in ["0","None"] else 0 for j in i] for i in tabela1]
+    for i in range(n):
+        for j in range(n):
+            if tabela[i][j] not in [0, "0","None",None] and tabela[i][j] not in spr:
+                imena[st] = tabela[i][j]
+                obrimena[tabela[i][j]] = st
+                st+=1
+                spr.add(tabela[i][j])
+
+    #v vsaki vrstici je vsaka številka na vsaj enem polju
+    f1 = In(*tuple(Ali(*tuple(Sprem(imena[i],imena[j],l) for j in range(n)))for i in range(n) for l in range(1,n+1)))
+
+    #v vsakem stolpcu je vsaka številka na vsaj enem polju
+    f2 = In(*tuple(Ali(*tuple(Sprem(imena[i],imena[j],l) for i in range(n)))for j in range(n) for l in range(1,n+1)))
+
+    #v vsakem kvadratku je vsaka številka na vsaj enem polju
+    f3 = In(*tuple(Ali(*tuple(Sprem(imena[i//k+j//k],imena[i%k+j%k],l) for j in range(n)))for i in range(n) for l in range(1,n+1)))
+
+    #če je na polju neko število, potem drugih števil ni
+    f4 = In(*tuple(Ali(Neg(Sprem(imena[i],imena[j],l)),Neg(Sprem(imena[i],imena[j],z))) for i in range(n) for j in range(n) for l in range(1,n+1) for z in (set(range(1,n+1))-{l})))
+
+    return In(f1,f2,f3,f4).poenostavi()
+
+##a = tchaff(sudoku1(t))
+##c = [a if i else "0" for (a,i) in a.items()]
+##d= [[None]*4 for i in range(4)]
+##for i in range(4):
+##    for j in range(4):
+##        for k in range(1,5):
+##            if "C({0},{1},{2})".format(i,j,k) in c:
+##                d[i][j]=k
+    
+
+def sudoku2(tabela1):
     #v poenostavljeni obliki je formula majhna, vendar je v cnf ogromna.
     n = len(tabela1)
     k = int(n**0.5)
@@ -155,7 +201,6 @@ def sudoku(tabela1):
     g = eval(sub(r"([^\(]+?)([0-9]+)([^\)]+?)",r"\1imena[\2-1]\3",str(g)))
     return barvanje(g,n)
 
-t = [[0,0,4,0],[0,2,0,3],[2,0,0,0],[0,4,0,1]]
 #a = [["Bla",None,None,None],["Kor",None,None,None],["AS",None,None,None],["MA",None,None,None]]
 
 g = {"a":{"b","c","d"},"b":{"a"},"c":{"a"},"d":{"a"}}
