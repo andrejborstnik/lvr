@@ -19,7 +19,7 @@ def demoo():
               " se v ustreznem formatu zapiše v datoteko, ali pa se lepo izpiše v datoteko."+
               " Opomba: podana datoteka mora obstajati, sicer se algoritem ne bo izvedel."
               " Prav tako si lahko izberemo, s katerim algoritmom bomo reševali problem. Trenutno so na voljo"+
-              " naslednji algoritni: DPLL, tchaff in bfSAT. ")
+              " naslednji algoritni: DPLL, chaff in bfSAT. ")
 
         print("\n")
         

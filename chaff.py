@@ -2,17 +2,18 @@ from util import *
 from booli import *
 from time import *
 from random import *
+from prevedbe import *
 
 
-def tchaff(formula, time = False):
+def chaff(formula, time = False, debug=False):
     t = clock()
-    a = ptchaff(formula)
+    a = pchaff(formula,debug)
     t1 = clock()
     if time:
         print(t1-t)
     return a
 
-def ptchaff(formula):
+def pchaff(formula,debug):
 
     ########################## ZAČETNO ČIŠČENJE ####################################################
     
@@ -54,9 +55,9 @@ def ptchaff(formula):
     kontrolniOd = {}                                        #za kontrolne literale pove za katere stavke so kontrolni
     literali = {}                                           #za vsak literal iz formule pove kako pogost je
     vzrok = {}                                              #kaj je pripeljalo do sklepa
-    sklepi = {}             #za vsako ugibanje kateri sklepi so sledili
-    ugibanja = []           #zaporedje ugibanj
-    naslednji = [False]     #če imamo določeno kaj probamo naslednje (ko pride do konflikta, se vrnemo do zadnje odločitve ne sprobane v obe smeri. S tem določimo da je naslednja na vrsti druga možnost za to ugibanje)
+    sklepi = {}                                             #za vsako ugibanje kateri sklepi so sledili
+    ugibanja = []                                           #zaporedje ugibanj
+    naslednji = [False]                                     #če imamo določeno kaj probamo naslednje (ko pride do konflikta, se vrnemo do zadnje odločitve ne sprobane v obe smeri. S tem določimo da je naslednja na vrsti druga možnost za to ugibanje)
     
 
     #izberemo kontrolne literale
@@ -179,6 +180,62 @@ def ptchaff(formula):
         
 
     ##################################################### TEŽKO DELO ############################################################################
+
+    def analiza():
+        """Preveri če je vse kot mora biti """
+        opravil = True
+        for stavek in form.sez:
+            opravil = opravil and (len(kontrolni[stavek])==2)
+        if opravil: print("1 - Vsak stavek ima dva kontrolna literala.")
+        else: print("0 - Obstaja stavek s premalo kontrolnimi literali!")
+
+        opravil = True
+        for stavek in form.sez:
+            opravil = opravil and (stavek in kontrolniOd[kontrolni[stavek][0]] and stavek in kontrolniOd[kontrolni[stavek][1]])
+        if not opravil: print("0 - Obstaja stavek, čigar kontrolni literali ne vejo, da so njegovi!")
+        else: print("1 - Kontrolni literali od stavkov vejo kam spadajo")
+
+        opravil = True
+        for lit in kontrolniOd:
+            for stavek in kontrolniOd[lit]:
+                opravil = opravil and (lit in kontrolni[stavek])
+        if not opravil: print("0 - Obstaja literal, ki misli da je kontrolni za nekaj kar ni.")
+        else: print("1 - Vsi kontrolni literali imajo svoje stavke")
+
+        opravil = True
+        for lit in ugibanja:
+            a = lit if type(lit)==Spr else lit.izr
+            opravil = opravil and (a in proban)
+        if opravil: print("1 - Vsa ugibanja so evidentirana v proban")
+        else: print("0 - Obstaja ugibanje, ki ga nismo shranili med probane")
+
+        opravil = True
+        for spr in proban:
+            opravil = opravil and (spr in ugibanja+naslednji or Neg(spr) in ugibanja+naslednji)
+        if opravil: print("1 - Vse kar je zabeležno kot probano je v ugibanja.")
+        else: print("0 - Nekaj imamo kot probano, čeprou ni med ugibanji.")
+
+        doloceni = []
+        for x in sklepi.values():
+            doloceni = doloceni + list(x)
+        
+        if len(set(doloceni))!=len(doloceni): print("0 - Obstaja sklep ki se pojavi večkrat.")
+        else: print("1 - Vsak sklep se pojavi natanko enkrat.")
+
+        opravil = True
+        for lit in vzrok:
+            opravil = opravil and (lit in doloceni)
+        if opravil: print("1 - Vsak literal z vzrokom je določen.")
+        else: print("0 - Imamo literal z vzrokom, ki pa ni določen.")
+
+        opravil = True
+        for lit in doloceni:
+            opravil = opravil and (lit in vzrok)
+        if opravil: print("1 - Vsak sklep ima svoj vzrok.")
+        else: print("0 - Obstaja sklep brez vzroka.")
+            
+        
+        
     
     while True:
         if naslednji[0]:
@@ -187,7 +244,7 @@ def ptchaff(formula):
             naslednji[0]=False
         else:
             a = ugibaj()
-        print(a, ugibanja)
+        #print(a, ugibanja)
         if not a:
             return vrednost #vsi literali imajo vrednost
         ugibanja.append(a)
@@ -198,9 +255,19 @@ def ptchaff(formula):
         while novi:
             novi = sklepaj(novi)
 
+        if debug:
+            print("Stanje po ugibanju in sklepanju:")
+            analiza()
+            print()
+            
+
         #print(len(sklepi[a]),len(set(sklepi[a])))
         if novi==False:     #treba trackat backat
             ugibanja = resiproblem(ugibanja)
+            if debug:
+                print("Stanje po sestopanju:")
+                analiza()
+                print()
             if ugibanja == "korenček": return "Formula ni izpolnljiva"
     
 prim = In(Ali(Spr("x"),Spr("z")),Ali(Spr("x"),Spr("u")),Ali(Spr("x"),Spr("v")),Ali(Neg(Spr("x")),Neg(Spr("y"))),Ali(Neg(Spr("x")),Spr("y")))

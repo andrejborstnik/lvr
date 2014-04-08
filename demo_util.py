@@ -1,11 +1,11 @@
 from prevedbe import *
 from util import *
-from tomazevchaff import tchaff
+from chaff import chaff
 from re import sub
 from os import path
 #a = sudoku([["Bla",None,None,None],["Kor",None,None,None],["AS",None,None,None],["MA",None,None,None]])
 
-def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver = "tchaff", izpis_output_file=""):
+def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver = "chaff", izpis_output_file=""):
     """ v datoteki pričakuje sudoku v formatu (primer 2x2):
     # a,b \n
     # c,d \n
@@ -14,7 +14,7 @@ def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver =
      V podani datoteki naj bo samo en sudoku in naj ne bo praznih vrstic."""
     if type(tabela)!= list:
         raise UsageError("Podan \"sudoku\" ni tabela.")
-    if solver not in ["DPLL","Chaff","bfSAT", "tchaff"]:
+    if solver not in ["DPLL","Chaff","bfSAT", "chaff"]:
         raise UsageError("Podali ste solver, ki ni implementiran! (ali pa ste se zatipkali)")
     if not tabela:
         if not input_file:
@@ -181,7 +181,7 @@ def test(k,velikost = 70):
         a = primer(n = velikost)
         print(len(a.spremenljivke()))
         b,t1a = DPLL(a,True)
-        c,t2a = tchaff(a,True)
+        c,t2a = chaff(a,True)
         t1+=t1a
         t2+=t2a
         if b:
@@ -218,8 +218,8 @@ def izp():
 def sol():
     solver = input("S katerim algoritmom zelite reševati problem?  ")
     if not solver:
-        solver = "tchaff"
-    elif solver not in ["DPLL","tchaff","bfSAT"]:
+        solver = "chaff"
+    elif solver not in ["DPLL","chaff","bfSAT"]:
         print("Algoritma \"{0}\" žal (še) nismo implementirali. Prosim, vnesite drug algoritem.".format(solver))
         return sol()
     return solver
@@ -231,6 +231,6 @@ def de():
     else: print("Žal te nisem razumel, prosim poizkusi ponovno!");return de()
     return dem
 #Rezultati testiranja:
-#tchaff je porabil 0.42 časa DPLL na velikosti 70, pri 100 ponovitvah
+#chaff je porabil 0.42 časa DPLL na velikosti 70, pri 100 ponovitvah
 #0.59, 100, 10
 #0.34, 100, 50

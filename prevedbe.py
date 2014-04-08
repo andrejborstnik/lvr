@@ -1,6 +1,6 @@
 from booli import *
 from solver import *
-from tomazevchaff import *
+from chaff import *
 from re import sub
 from util import primer
 
