@@ -52,6 +52,9 @@ def ptchaff(formula):
     kontrolniOd = {}                                        #za kontrolne literale pove za katere stavke so kontrolni
     literali = {}                                           #za vsak literal iz formule pove kako pogost je
     vzrok = {}                                              #kaj je pripeljalo do sklepa
+    sklepi = {}             #za vsako ugibanje kateri sklepi so sledili
+    ugibanja = []           #zaporedje ugibanj
+    naslednji = [False]     #če imamo določeno kaj probamo naslednje (ko pride do konflikta, se vrnemo do zadnje odločitve ne sprobane v obe smeri. S tem določimo da je naslednja na vrsti druga možnost za to ugibanje)
     
 
     #izberemo kontrolne literale
@@ -65,7 +68,7 @@ def ptchaff(formula):
         if b in kontrolniOd: kontrolniOd[b].append(stavek)
         else: kontrolniOd[b]=[stavek]
         
-    #poiščemo vse literale v naši formuli in vse njihove negacije (tudi če jih v formuli ni)
+    #poiščemo vse literale v naši formuli
     for stavek in form.sez:
         for lit in stavek.sez:
             literali[lit]=literali.get(lit,0)+1
@@ -175,9 +178,6 @@ def ptchaff(formula):
 
     ##################################################### TEŽKO DELO ############################################################################
     
-    sklepi = {}             #za vsako ugibanje kateri sklepi so sledili
-    ugibanja = []           #zaporedje ugibanj
-    naslednji = [False]     #če imamo določeno kaj probamo naslednje (ko pride do konflikta, se vrnemo do zadnje odločitve ne sprobane v obe smeri. S tem določimo da je naslednja na vrsti druga možnost za to ugibanje)
     while True:
         if naslednji[0]:
             a = naslednji[0]

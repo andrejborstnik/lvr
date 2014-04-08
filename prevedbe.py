@@ -104,7 +104,7 @@ def sudoku1(tabela1):#tale pa kao ni izpolnjiv za t(tudi tale mee errorje). lahk
     f2 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for i in range(n)))for j in range(n) for l in range(1,n+1)))
 
     #v vsakem kvadratku je vsaka številka na vsaj enem polju
-    f3 = In(*tuple(Ali(*tuple(Sprem(i//k+j//k,i%k+j%k,imena[l-1]) for j in range(n)))for i in range(n) for l in range(1,n+1)))
+    f3 = In(*tuple(Ali(*tuple(Sprem(k*(i//k)+j//k,k*(i%k)+j%k,imena[l-1]) for j in range(n)))for i in range(n) for l in range(1,n+1)))
 
     #če je na polju neko število, potem drugih števil ni
     f4 = In(*tuple(Ali(Neg(Sprem(i,j,imena[l-1])),Neg(Sprem(i,j,imena[z-1]))) for i in range(n) for j in range(n) for l in range(1,n+1) for z in (set(range(1,n+1))-{l})))
@@ -113,6 +113,7 @@ def sudoku1(tabela1):#tale pa kao ni izpolnjiv za t(tudi tale mee errorje). lahk
     f5 = In(*tuple(Sprem(i,j,tabela[i][j]) if tabela[i][j] not in [0, "0","None",None] else T() for i in range(n) for j in range(n)))
 
     return In(f1,f2,f3,f4,f5).poenostavi()
+
 
 def sudoku4(tabela1):#tale sudoku pa vrne error na t (včasih. ko deletaš probane je bil key error in error, da i nima spremenljivk) in prav tako vrne valuacijo, ki ni true
     #boljša prevedba sudoku na sat
@@ -228,6 +229,7 @@ def sudoku2(tabela1):
     return In(*tuple(i for i in f)).poenostavi()
 
 def sudoku(tabela1):
+    """ Prevede sudoku na sat preko barvanja grafa. """
     n = len(tabela1)
     k = int(n**0.5)
     #Preslikamo podane spremenljivke sudokuja v [n].
