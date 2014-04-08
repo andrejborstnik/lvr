@@ -278,7 +278,7 @@ def sudoku(tabela1):
 
 #a = [["Bla",None,None,None],["Kor",None,None,None],["AS",None,None,None],["MA",None,None,None]]
 
-g = {"a":{"b","c","d"},"b":{"a"},"c":{"a"},"d":{"a"}}
+g = {"a":{"b","c","d"},"b":{"a","c"},"c":{"a","b"},"d":{"a"}}
 
 
 

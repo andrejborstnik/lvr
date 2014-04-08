@@ -117,9 +117,11 @@ def pchaff(formula,debug):
         """kontrolni literal l je treba zamenjati, ker je l nastavljen na False"""
         for stavek in kontrolniOd[l]:
             najden = False
-            i=kontrolni[stavek].index(l)
+            kont = kontrolni[stavek]
+            i=kont.index(l)
+            drugi = kont[1-i].ime if type(kont[1-i])==Spr else kont[1-i].izr.ime
             #če stavek še ni izpolnjen
-            if vrednost[kontrolni[stavek][1-i].ime if type(kontrolni[stavek][1-i])==Spr else kontrolni[stavek][1-i].izr.ime]==None:
+            if vrednost[drugi]==None:
                 for literal in stavek.sez:
                     if literal not in kontrolni[stavek] and vrednost[literal.ime if type(literal)==Spr else literal.izr.ime]!=False:
                         kontrolni[stavek][i]=literal
@@ -178,12 +180,20 @@ def pchaff(formula,debug):
             nabor = temp
         return Ali(*tuple(nabor))
 
+
     def analiza():
         """Preveri če je vse kot mora biti """
+
 
         doloceni = []
         for x in sklepi.values():
             doloceni = doloceni + list(x)
+
+        opravil = True
+        for lit in doloceni:
+            if literali[lit]>0: opravil = False
+        if not opravil: print("0 - obstaja dolocen literal ki ga lahko izberemo za ugibanje.")
+            
         
         opravil = True
         for stavek in form.sez:
@@ -205,8 +215,9 @@ def pchaff(formula,debug):
         else: print("1 - Vsi kontrolni literali imajo svoje stavke.")
 
         opravil = True
-        for i in vrednost:
-            if vrednost[i]!=None and Spr(i) not in doloceni and Neg(Spr(i)) not in doloceni:
+        for lit in literali:
+            ime = lit.ime if type(lit)==Spr else lit.izr.ime
+            if vrednost[ime]!=None and lit not in doloceni and Neg(lit).poenostavi() not in doloceni:
                 opravil = False
         if opravil: print("1 - Vse spremenljivke z vrednostjo so v sklepih.")
         else: print("0 - Obstaja spremenljivka z vrednostjo, ki je ni v sklepih.")
@@ -240,25 +251,33 @@ def pchaff(formula,debug):
                 opravil = False
             elif b==False and a == False:
                 print("999 - Obstaja stavek ki ima oba kontrolna False!")
+                print(stavek)
+                print(kontrolni[stavek])
+                print(sklepi)
                 opravil = False
-        if opravil: print("Vsi kontrolni literali so zadovoljivo vrednoteni.")
+        if opravil: print("1 - Vsi kontrolni literali so zadovoljivo vrednoteni.")
+
+        if ugibanja!="korenček":
+
+            opravil = True
+            for lit in ugibanja:
+                try:
+                    a = lit if type(lit)==Spr else lit.izr
+                except:
+                    print(type(lit))
+                    print(ugibanja)
+                opravil = opravil and (a in proban)
+            if opravil: print("1 - Vsa ugibanja so evidentirana v proban")
+            else: print("0 - Obstaja ugibanje, ki ga nismo shranili med probane")
+
+            opravil = True
+            for spr in proban:
+                opravil = opravil and (spr in ugibanja+naslednji or Neg(spr) in ugibanja+naslednji)
+            if opravil: print("1 - Vse kar je zabeležno kot probano je v ugibanja.")
+            else: print("0 - Nekaj imamo kot probano, čeprou ni med ugibanji.")
             
-
-        opravil = True
-        for lit in ugibanja:
-            a = lit if type(lit)==Spr else lit.izr
-            opravil = opravil and (a in proban)
-        if opravil: print("1 - Vsa ugibanja so evidentirana v proban")
-        else: print("0 - Obstaja ugibanje, ki ga nismo shranili med probane")
-
-        opravil = True
-        for spr in proban:
-            opravil = opravil and (spr in ugibanja+naslednji or Neg(spr) in ugibanja+naslednji)
-        if opravil: print("1 - Vse kar je zabeležno kot probano je v ugibanja.")
-        else: print("0 - Nekaj imamo kot probano, čeprou ni med ugibanji.")
-        
-        if len(set(doloceni))!=len(doloceni): print("0 - Obstaja sklep ki se pojavi večkrat.")
-        else: print("1 - Vsak sklep se pojavi natanko enkrat.")
+            if len(set(doloceni))!=len(doloceni): print("0 - Obstaja sklep ki se pojavi večkrat.")
+            else: print("1 - Vsak sklep se pojavi natanko enkrat.")
 
         opravil = True
         for lit in vzrok:
