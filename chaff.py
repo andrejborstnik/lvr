@@ -76,7 +76,7 @@ def pchaff(formula,debug):
         for lit in stavek.sez:
             literali[lit]=literali.get(lit,0)+1
 
-    
+    stliteralov = len(literali)
             
     ################################ POMOŽNE FUNKCIJE ######################################################################
     def ugibaj():
@@ -177,12 +177,14 @@ def pchaff(formula,debug):
                     temp.append(x)
             nabor = temp
         return Ali(*tuple(nabor))
-        
-
-    ##################################################### TEŽKO DELO ############################################################################
 
     def analiza():
         """Preveri če je vse kot mora biti """
+
+        doloceni = []
+        for x in sklepi.values():
+            doloceni = doloceni + list(x)
+        
         opravil = True
         for stavek in form.sez:
             opravil = opravil and (len(kontrolni[stavek])==2)
@@ -200,7 +202,47 @@ def pchaff(formula,debug):
             for stavek in kontrolniOd[lit]:
                 opravil = opravil and (lit in kontrolni[stavek])
         if not opravil: print("0 - Obstaja literal, ki misli da je kontrolni za nekaj kar ni.")
-        else: print("1 - Vsi kontrolni literali imajo svoje stavke")
+        else: print("1 - Vsi kontrolni literali imajo svoje stavke.")
+
+        opravil = True
+        for i in vrednost:
+            if vrednost[i]!=None and Spr(i) not in doloceni and Neg(Spr(i)) not in doloceni:
+                opravil = False
+        if opravil: print("1 - Vse spremenljivke z vrednostjo so v sklepih.")
+        else: print("0 - Obstaja spremenljivka z vrednostjo, ki je ni v sklepih.")
+
+        opravil = True
+        for lit in doloceni:
+            a = lit.ime if type(lit)==Spr else lit.izr.ime
+            if vrednost[a]==None: opravil = False
+        if opravil: print("1 - Vsaka sklepana spremenljivka ima vrednost.")
+        else: print("0 - Obstaja sklepana spremenljivka brez vrednosti.")
+
+        opravil = True
+        for stavek in kontrolni:
+            lit1 = kontrolni[stavek][0]
+            lit2 = kontrolni[stavek][1]
+            ime1 = lit1.ime if type(lit1)==Spr else lit1.izr.ime
+            ime2 = lit2.ime if type(lit2)==Spr else lit2.izr.ime
+            
+            if vrednost[ime1]!=None:
+                if type(lit1)==Spr: a = vrednost[ime1]
+                else: a = not vrednost[ime1]
+            else: a = None
+            
+            if vrednost[ime2]!=None:
+                if type(lit2)==Spr: b = vrednost[ime2]
+                else: b = not vrednost[ime2]
+            else: b = None
+            
+            if (a == None and b == False) or (a ==False and b==None):
+                print("999 - Obstaja stavek, ki ima en kontrolni False drugega pa ne na True.")
+                opravil = False
+            elif b==False and a == False:
+                print("999 - Obstaja stavek ki ima oba kontrolna False!")
+                opravil = False
+        if opravil: print("Vsi kontrolni literali so zadovoljivo vrednoteni.")
+            
 
         opravil = True
         for lit in ugibanja:
@@ -214,10 +256,6 @@ def pchaff(formula,debug):
             opravil = opravil and (spr in ugibanja+naslednji or Neg(spr) in ugibanja+naslednji)
         if opravil: print("1 - Vse kar je zabeležno kot probano je v ugibanja.")
         else: print("0 - Nekaj imamo kot probano, čeprou ni med ugibanji.")
-
-        doloceni = []
-        for x in sklepi.values():
-            doloceni = doloceni + list(x)
         
         if len(set(doloceni))!=len(doloceni): print("0 - Obstaja sklep ki se pojavi večkrat.")
         else: print("1 - Vsak sklep se pojavi natanko enkrat.")
@@ -233,8 +271,13 @@ def pchaff(formula,debug):
             opravil = opravil and (lit in vzrok)
         if opravil: print("1 - Vsak sklep ima svoj vzrok.")
         else: print("0 - Obstaja sklep brez vzroka.")
+
+        if len(literali)!=stliteralov:
+            print("0 - stevilo literalov se spremeni.")
+        else:
+            print("1 - stevilo literalov je enako kot na začetku.")
             
-        
+##################################################### TEŽKO DELO ############################################################################       
         
     
     while True:
