@@ -40,6 +40,8 @@ def ptchaff(formula):
 
         if type(form)==T: return vrednost
         elif type(form)==F: return "Formula ni izpolnljiva"
+        elif type(form)==Neg: vrednost[form.izr.ime] = False; return vrednost
+        elif type(form)==Spr: vrednost[form.ime] = True; return vrednost
 
     
     #Ostali so nam le Ali-ji dolžine 2 in več
@@ -153,7 +155,7 @@ def ptchaff(formula):
             del sklepi[ugibanja[odl]]
             #print(sklepi)
             if odl>i:
-                del proban[ugibanja[odl]]
+                del proban[ugibanja[odl] if type(ugibanja[odl])==Spr else ugibanja[odl].izr]
         naslednji[0] = Neg(ugibanja[i]) if type(ugibanja[i]) == Spr else ugibanja[i].izr
         ugibanja = ugibanja[:i]
         return ugibanja
@@ -185,6 +187,7 @@ def ptchaff(formula):
             naslednji[0]=False
         else:
             a = ugibaj()
+        print(a, ugibanja)
         if not a:
             return vrednost #vsi literali imajo vrednost
         ugibanja.append(a)
