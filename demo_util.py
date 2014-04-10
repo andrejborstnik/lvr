@@ -97,7 +97,7 @@ def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver =
         f.close()
     return None
 
-def resit(rezultat,n):
+def resit1(rezultat,n):
     resitev = [[None]*n for j in range(n)]
     barve = [None]*n
     rezultat = eval(sub(r"(\")+",r"\"",str(rezultat)))
@@ -110,6 +110,16 @@ def resit(rezultat,n):
         if rezultat[i] and j[0][0] == "(":
             j = eval(j[0]),j[1]
             resitev[j[0][0]][j[0][1]] = barve[j[1]]
+    return resitev
+
+def resit(rezultat,n):
+    resitev = [[None]*n for j in range(n)]
+    barve = [None]*n
+    rezultat = eval(sub(r"(\")+",r"\"",str(rezultat)))
+    for i in rezultat.keys():
+        j = eval(i)
+        if rezultat[i]:
+            resitev[j[0]][j[1]]=j[2]
     return resitev
 
 def prikazi(resitev,file=False):

@@ -111,11 +111,11 @@ def latinski(tabela1):
     return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez))
 
 
-def sudoku1(tabela1):#tale pa kao ni izpolnjiv za t(tudi tale mee errorje). lahko sicer, da sem se kaj zmotil
+def sudoku(tabela1):#tale pa kao ni izpolnjiv za t(tudi tale mee errorje). lahko sicer, da sem se kaj zmotil
     n = len(tabela1)
     k = int(n**0.5)
     def Sprem(u,v,n):
-        return Spr("C({0},{1},{2})".format(u,v,n))
+        return Spr("{0},{1},{2}".format(u,v,n))
 
     spr = set()
     imena = [None]*n
@@ -147,7 +147,7 @@ def sudoku1(tabela1):#tale pa kao ni izpolnjiv za t(tudi tale mee errorje). lahk
     #nastavimo začetne vrednosti
     f5 = In(*tuple(Sprem(i,j,tabela[i][j]) if tabela[i][j] not in [0, "0","None",None] else T() for i in range(n) for j in range(n)))
 
-    return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez | f5.sez)),f3
+    return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez | f5.sez))
 
 
 def sudoku4(tabela1):#tale sudoku pa vrne error na t (včasih. ko deletaš probane je bil key error in error, da i nima spremenljivk) in prav tako vrne valuacijo, ki ni true
@@ -263,7 +263,7 @@ def sudoku2(tabela1):
             
     return In(*tuple(i for i in f)).poenostavi()
 
-def sudoku(tabela1):
+def sudoku1(tabela1):
     """ Prevede sudoku na sat preko barvanja grafa. """
     n = len(tabela1)
     k = int(n**0.5)
@@ -308,6 +308,7 @@ def sudoku(tabela1):
     #for i in g: print(i,g[i])
 
     #zamenjamo nazaj imena spremenljivk, namesto številk
+    print(g)
     g = eval(sub(r"([^\(]+?)([0-9]+)([^\)]+?)",r"\1imena[\2-1]\3",str(g)))
     return barvanje(g,n)
 
