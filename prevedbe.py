@@ -4,7 +4,8 @@ from chaff import *
 from re import sub
 from util import primer
 
-t = [[0,0,4,0],[0,2,0,3],[2,0,0,0],[0,4,0,1]]
+t1 = [[0,0,4,0],[0,2,0,3],[2,0,0,0],[0,4,0,1]]
+t2 = [[0,0,0,0],[0,2,0,3],[2,0,0,0],[0,0,0,1]]
 
 def barvanje(g,k):
     """Ali lahko graf podan s slovarjem g pobarvamo s k barvami? """
@@ -75,7 +76,41 @@ def povezanost(g):
     print(In(f1,f2,f3,f4))
     return In(f1,f2,f3,f4).poenostavi()
 
-    #???Zakaj ko kličem a = sudoku4(t);b = tchaff(b) se včasih sesuje, včasih ne...tchaff ne dela? In zakaj a.vstavi(b) že skoraj popolnoma poenostavi formulo??
+def latinski(tabela1):
+    n = len(tabela1)
+    def Sprem(u,v,n):
+        return Spr("({0},{1},{2})".format(u,v,n))
+
+    spr = set()
+    imena = [None]*n
+    obrimena = {}
+    st = 0
+    tabela = [[j if j not in ["0","None"] else 0 for j in i] for i in tabela1]
+    for i in range(n):
+        for j in range(n):
+            if tabela[i][j] not in [0, "0","None",None] and tabela[i][j] not in spr:
+                imena[st] = tabela[i][j]
+                obrimena[tabela[i][j]] = st
+                st+=1
+                spr.add(tabela[i][j])
+    st = 0
+    imena = [imena[i-1] if imena[i-1] else i for i in range(1,n+1)]
+
+    #v vsaki vrstici je vsaka številka na vsaj enem polju
+    f1 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for j in range(n)))for i in range(n) for l in range(1,n+1)))
+
+    #v vsakem stolpcu je vsaka številka na vsaj enem polju
+    f2 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for i in range(n)))for j in range(n) for l in range(1,n+1)))
+
+    #če je na polju neko število, potem drugih števil ni
+    f3 = In(*tuple(Ali(Neg(Sprem(i,j,imena[l-1])),Neg(Sprem(i,j,imena[z-1]))) for i in range(n) for j in range(n) for l in range(1,n+1) for z in (set(range(1,n+1))-{l})))
+
+    #nastavimo začetne vrednosti
+    f4 = In(*tuple(Sprem(i,j,tabela[i][j]) if tabela[i][j] not in [0, "0","None",None] else T() for i in range(n) for j in range(n)))
+
+    return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez))
+
+
 def sudoku1(tabela1):#tale pa kao ni izpolnjiv za t(tudi tale mee errorje). lahko sicer, da sem se kaj zmotil
     n = len(tabela1)
     k = int(n**0.5)
@@ -95,7 +130,7 @@ def sudoku1(tabela1):#tale pa kao ni izpolnjiv za t(tudi tale mee errorje). lahk
                 st+=1
                 spr.add(tabela[i][j])
     st = 0
-    imena = [imena[i] if imena[i] else i for i in range(n)]
+    imena = [imena[i-1] if imena[i-1] else i for i in range(1,n+1)]
 
     #v vsaki vrstici je vsaka številka na vsaj enem polju
     f1 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for j in range(n)))for i in range(n) for l in range(1,n+1)))
@@ -112,7 +147,7 @@ def sudoku1(tabela1):#tale pa kao ni izpolnjiv za t(tudi tale mee errorje). lahk
     #nastavimo začetne vrednosti
     f5 = In(*tuple(Sprem(i,j,tabela[i][j]) if tabela[i][j] not in [0, "0","None",None] else T() for i in range(n) for j in range(n)))
 
-    return In(f1,f2,f3,f4,f5).poenostavi()
+    return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez | f5.sez)),f3
 
 
 def sudoku4(tabela1):#tale sudoku pa vrne error na t (včasih. ko deletaš probane je bil key error in error, da i nima spremenljivk) in prav tako vrne valuacijo, ki ni true

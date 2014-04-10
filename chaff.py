@@ -16,9 +16,23 @@ def chaff(formula, time = False, debug=False):
 def pchaff(formula,debug):
 
     ########################## ZAČETNO ČIŠČENJE ####################################################
+
+    def ime(lit):
+        return lit.ime if type(lit)==Spr else lit.izr.ime
+
+    def neg(lit):
+        return Neg(lit) if type(lit)==Spr else lit.izr
+
+    def vred(lit):
+        if type(lit) == Spr:
+            return vrednost[lit.ime]
+        else:
+            a = vrednost[lit.izr.ime]
+            return a if a==None else (not a)
     
+        
     vrednost = {i:None for i in formula.spremenljivke()}
-    form = formula.poenostavi(cnf=True)
+    form = formula.poenostavi(chff=True)
 
     if type(form)==T: return vrednost
     elif type(form)==F: return "Formula ni izpolnljiva"
@@ -37,7 +51,7 @@ def pchaff(formula,debug):
                 nove[stavek.izr.ime]=False
                 vrednost[stavek.izr.ime]=False
                 
-        form = form.vstavi(nove).poenostavi(cnf=True)
+        form = form.vstavi(nove).poenostavi(chff=True)
 
         if type(form)==T: return vrednost
         elif type(form)==F: return "Formula ni izpolnljiva"
@@ -49,15 +63,15 @@ def pchaff(formula,debug):
 
     
     ############################ NEKATERE DEFINICIJE #####################################################################
-        
-    proban = {}                                             #1 - v eno smer proban, 2 - obe možnosti že preizkušeni
-    kontrolni = {}                                          #za vsak stavek kateri literali so v njem kontrolni
-    kontrolniOd = {}                                        #za kontrolne literale pove za katere stavke so kontrolni
-    literali = {}                                           #za vsak literal iz formule pove kako pogost je
-    vzrok = {}                                              #kaj je pripeljalo do sklepa
-    sklepi = {}                                             #za vsako ugibanje kateri sklepi so sledili
-    ugibanja = []                                           #zaporedje ugibanj
-    naslednji = [False]                                     #če imamo določeno kaj probamo naslednje (ko pride do konflikta, se vrnemo do zadnje odločitve ne sprobane v obe smeri. S tem določimo da je naslednja na vrsti druga možnost za to ugibanje)
+    
+    proban = {}                                             #ključi so imena spremenljivk. 1 - v eno smer proban, 2 - obe možnosti že preizkušeni
+    kontrolni = {}                                          #ključi so stavki. za vsak stavek kateri literali so v njem kontrolni
+    kontrolniOd = {}                                        #ključi so literali. za kontrolne literale pove za katere stavke so kontrolni
+    literali = {}                                           #ključi so literali. za vsak literal iz formule pove kako pogost je
+    vzrok = {}                                              #ključi so literali. kaj je pripeljalo do sklepa
+    sklepi = {}                                             #ključi so literali. za vsako ugibanje kateri sklepi so sledili
+    ugibanja = []                                           #vsebuje literale. zaporedje ugibanj
+    naslednji = [False]                                     #vsebuje literal. če imamo določeno kaj probamo naslednje (ko pride do konflikta, se vrnemo do zadnje odločitve ne sprobane v obe smeri. S tem določimo da je naslednja na vrsti druga možnost za to ugibanje)
     
 
     #izberemo kontrolne literale
@@ -66,15 +80,14 @@ def pchaff(formula,debug):
         a = next(temp)
         b = next(temp)
         kontrolni[stavek]=[a,b]
-        if a in kontrolniOd: kontrolniOd[a].append(stavek)
-        else: kontrolniOd[a]=[stavek]
-        if b in kontrolniOd: kontrolniOd[b].append(stavek)
-        else: kontrolniOd[b]=[stavek]
+        kontrolniOd[a]=kontrolniOd.get(a,[])+[stavek]
+        kontrolniOd[b]=kontrolniOd.get(b,[])+[stavek]
         
     #poiščemo vse literale v naši formuli
     for stavek in form.sez:
         for lit in stavek.sez:
             literali[lit]=literali.get(lit,0)+1
+            literali[neg(lit)] = literali.get(neg(lit),0)
 
     stliteralov = len(literali)
             
@@ -88,29 +101,30 @@ def pchaff(formula,debug):
             vzrok[y] = []
             return y
         
-    def sklepaj(novi):
+    def sklepaj(novi,a):
         """Po ugibanju tranzitivno naredi sklepe, ki iz njega sledijo"""
         temp = []
         for lit in novi:
             sklepi[a].add(lit)
-            literali[lit]*=-1   #frekvenci spremeni predznak, da vemo da je že izbran - zato ga ne izberemo še enkrat
-            u = Neg(lit) if type(lit)==Spr else lit.izr
-            if u in literali: literali[u]*=-1
+            literali[lit]=-abs(literali[lit])   #frekvenci spremeni predznak, da vemo da je že izbran - zato ga ne izberemo še enkrat
+            literali[neg(lit)]=-abs(literali[neg(lit)])
+            x = ime(lit)
             if type(lit)==Spr:
-                x = lit.ime
-                if vrednost[x] == False: return False   #prišlo je do konflikta
+                if vrednost[x] == False: return "konflikt",lit   #prišlo je do konflikta
                 elif vrednost[x] == None:
                     vrednost[x]=True
-                    if Neg(lit) in kontrolniOd: temp = menjaj(Neg(lit),temp)
+                    if neg(lit) in kontrolniOd: temp = menjaj(neg(lit),temp)
+                    
             elif type(lit)==Neg:
-                x = lit.izr.ime
-                if vrednost[x]: return False    #prišlo je do konflikta
+                if vrednost[x]: return "konflikt",lit   #prišlo je do konflikta
                 elif vrednost[x] == None:
                     vrednost[x]=False
-                    if lit.izr in kontrolniOd: temp = menjaj(lit.izr,temp)
+                    if neg(lit) in kontrolniOd: temp = menjaj(neg(lit),temp)
+                    
             else:
                 raise InternalError("Formula je v napačnem formatu.")
-
+            if temp and temp[0]=="konflikt": return temp
+            
         return temp
 
     def menjaj(l,temp):
@@ -119,65 +133,68 @@ def pchaff(formula,debug):
             najden = False
             kont = kontrolni[stavek]
             i=kont.index(l)
-            drugi = kont[1-i].ime if type(kont[1-i])==Spr else kont[1-i].izr.ime
+            drugi = kont[1-i]
             #če stavek še ni izpolnjen
-            if vrednost[drugi]==None:
+            v = vred(drugi)
+            if v == None or v == True:
                 for literal in stavek.sez:
-                    if literal not in kontrolni[stavek] and vrednost[literal.ime if type(literal)==Spr else literal.izr.ime]!=False:
-                        kontrolni[stavek][i]=literal
-                        if literal in kontrolniOd: kontrolniOd[literal].append(stavek)
-                        else: kontrolniOd[literal]=[stavek]
+                    if literal not in kont and vred(literal)!=False:
+                        kont[i]=literal
+                        kontrolniOd[literal] = kontrolniOd.get(literal,[])+[stavek]
                         najden = True
                         kontrolniOd[l].remove(stavek)
                         break
-                if not najden:
-                    x = kontrolni[stavek][1-i]  #edini ostali kontrolni literal v stavku, ki more dati vrednost True+
-                    temp.append(x)
-                    vzrok[x] = [t for t in stavek.sez if t!=x]
+                if not najden and v==None:
+                    temp.append(drugi)
+                    vzrok[drugi] = [t for t in stavek.sez if t!=drugi]
+            elif v==False:
+                vzrok[l] = [t for t in stavek.sez if t!=l]
+                return "konflikt",l
         if kontrolniOd[l]==[]: del kontrolniOd[l]
         return temp
 
     def resiproblem(ugibanja):
         """če pride do protislovja pri ugibanju se vrnemo do najkasnejšega ugibanja, ki še ni imelo preverjeni obe možnosti """
         i = len(ugibanja)-1
-        while proban[ugibanja[i] if type(ugibanja[i]) == Spr else ugibanja[i].izr]==2:
+        while proban[ime(ugibanja[i])]==2:
             i-=1
-            if i<0: return "korenček" #vse možnosti že sprobane
+            if i<0: return "konec" #vse možnosti že sprobane
         #print(ugibanja)
         #print(sklepi)
+        #odstranimo vse sklepe ki smo jih naredili od tega ugibanja dalje
         for odl in range(i,len(ugibanja)):
             #print("")
             #print(ugibanja[odl])
             for lit in sklepi[ugibanja[odl]]:
                 #ponovno bo lahko izbran za ugibanje
-                literali[lit]*=-1   
-                u = Neg(lit) if type(lit)==Spr else lit.izr
-                if u in literali: literali[u]*=-1
-                vrednost[lit.ime if type(lit)==Spr else lit.izr.ime] = None
+                if literali[lit]>0: print("neki ga serje")
+                literali[lit]=abs(literali[lit])
+                literali[neg(lit)]=abs(literali[neg(lit)])
+                vrednost[ime(lit)] = None
                 del vzrok[lit]
             del sklepi[ugibanja[odl]]
             #print(sklepi)
             if odl>i:
-                del proban[ugibanja[odl] if type(ugibanja[odl])==Spr else ugibanja[odl].izr]
-        naslednji[0] = Neg(ugibanja[i]) if type(ugibanja[i]) == Spr else ugibanja[i].izr
+                del proban[ime(ugibanja[odl])]
+        naslednji[0] = neg(ugibanja[i])
         ugibanja = ugibanja[:i]
         return ugibanja
 
     def konstavek(lit):
         """vrne nov stavek, ki prepreči ponavljanje iste napake """
-        nabor = vzrok[lit]+vzrok[Neg(lit) if type(lit)==Spr else lit.izr]
+        nabor = vzrok.get(neg(lit),[])+vzrok.get(neg(lit),[])
         c= True
         while c:
             c = False
-            temp = []
+            tempo = []
             for x in nabor:
-                a=vzrok[Neg(x) if type(x)==Spr else x.izr]
-                if a:
+                a=vzrok[neg(x)]
+                if a!=[]:
                     c = True
-                    temp+= a
+                    tempo+= a
                 else:
-                    temp.append(x)
-            nabor = temp
+                    tempo.append(x)
+            nabor = tempo
         return Ali(*tuple(nabor))
 
 
@@ -310,12 +327,13 @@ def pchaff(formula,debug):
         if not a:
             return vrednost #vsi literali imajo vrednost
         ugibanja.append(a)
-        b = a if type(a)== Spr else a.izr
-        proban[b]=proban.get(b,0)+1
+        proban[ime(a)]=proban.get(ime(a),0)+1
         sklepi[a]=set()
         novi = [a]
-        while novi:
-            novi = sklepaj(novi)
+        while novi and novi[0]!="konflikt":
+            novi = sklepaj(novi,a)
+        #print(ugibanja, sklepi[a])
+        #print()
 
         if debug:
             print("Stanje po ugibanju in sklepanju:")
@@ -323,14 +341,15 @@ def pchaff(formula,debug):
             print()
             
 
-        #print(len(sklepi[a]),len(set(sklepi[a])))
-        if novi==False:     #treba trackat backat
+        #print(sklepi)
+        if novi and novi[0]=="konflikt":     #treba trackat backat
+            #print(konstavek(novi[1]))
             ugibanja = resiproblem(ugibanja)
             if debug:
                 print("Stanje po sestopanju:")
                 analiza()
                 print()
-            if ugibanja == "korenček": return "Formula ni izpolnljiva"
+            if ugibanja == "konec": return "Formula ni izpolnljiva"
     
 prim = In(Ali(Spr("x"),Spr("z")),Ali(Spr("x"),Spr("u")),Ali(Spr("x"),Spr("v")),Ali(Neg(Spr("x")),Neg(Spr("y"))),Ali(Neg(Spr("x")),Spr("y")))
                 

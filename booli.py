@@ -20,7 +20,7 @@ class T():
     def kopija(self):
         return T()
     
-    def poenostavi(self,cnf=False):
+    def poenostavi(self,cnf=False,chff=False):
         return T()
 
     def spremenljivke(self):
@@ -49,7 +49,7 @@ class F():
     def kopija(self):
         return F()
     
-    def poenostavi(self,cnf=False):
+    def poenostavi(self,cnf=False,chff=False):
         return F()
 
     def spremenljivke(self):
@@ -86,7 +86,7 @@ class Spr():
     def kopija(self):
         return Spr(self.ime)
     
-    def poenostavi(self,cnf=False):
+    def poenostavi(self,cnf=False,chff=False):
         return Spr(self.ime)
 
     def spremenljivke(self):
@@ -121,7 +121,7 @@ class Neg():
     def kopija(self):
         return Neg(self.izr.kopija())
     
-    def poenostavi(self,cnf=False):
+    def poenostavi(self,cnf=False,chff=False):
         a = self.izr.kopija().poenostavi(cnf)
         tip = type(a)
         if tip == T:
@@ -178,12 +178,12 @@ class In():
     def kopija(self):
         return In(*tuple(i.kopija() for i in self.sez))
     
-    def poenostavi(self,cnf=False):
+    def poenostavi(self,cnf=False,chff=False):
         if len(self.sez)==0: return T()
-        elif len(self.sez)==1: return self.kopija().sez.pop().poenostavi(cnf)
+        elif len(self.sez)==1: return self.kopija().sez.pop().poenostavi(cnf,chff)
         slo = {}
         for i in self.kopija().sez:
-            i=i.poenostavi(cnf)
+            i=i.poenostavi(cnf,chff)
             if type(i)==F: return F()
             elif type(i)==T: pass
             elif type(i) in slo:
@@ -191,59 +191,61 @@ class In():
             else:
                 slo[type(i)]={i}
 
-        #če imaš In znotraj In, ju lahko združiš
-        if In in slo.keys():
-            for j in slo[In]:
-                for i in j.sez:
-                    if type(i) in slo: slo[type(i)].add(i)
-                    else: slo[type(i)]={i}
-      
-            del slo[In]
+        if not chff:
+            #če imaš In znotraj In, ju lahko združiš
+            if In in slo.keys():
+                for j in slo[In]:
+                    for i in j.sez:
+                        if type(i) in slo: slo[type(i)].add(i)
+                        else: slo[type(i)]={i}
+          
+                del slo[In]
+            
 
-        #complementary law
-        if Neg in slo.keys():
-            for i in slo[Neg]:
-                for j in slo.values():
-                    if i.izr in j:
-                        return F()
+            #complementary law
+            if Neg in slo.keys():
+                for i in slo[Neg]:
+                    for j in slo.values():
+                        if i.izr in j:
+                            return F()
 
-        #absorpcija in common identities
-        if Ali in slo.keys():
-            menjave={}
-            for i in slo[Ali]:
-                for j in slo.values():
-                    for k in j:
-                        if k in i.sez:
-                            menjave[i]=0
-                        elif Neg(k) in i.sez:
-                            menjave[i]=i.sez-{Neg(k)}
-            slo[Ali]={(Ali(*tuple(menjave[i])).poenostavi(cnf) if menjave[i]!=0 else None ) if i in menjave else i for i in slo[Ali]} - {None}
-
-            #po absorpciji je treba tipe podizrazov posodobiti
-            pomo=[]
-            for i in slo[Ali]:
-                if type(i)!=Ali:
-                    pomo.append(i)
-                    if type(i) in slo: slo[type(i)].add(i)
-                    else: slo[type(i)]={i}
-            for i in pomo: 
-                slo[Ali].remove(i)
-                
-        #distributivnost
-                    
-            if len(slo[Ali])>1 and not cnf:
-                presek = 42
+            #absorpcija in common identities
+            if Ali in slo.keys():
+                menjave={}
                 for i in slo[Ali]:
-                    if presek==42:
-                        presek={j for j in i.sez}
-                    else:
-                        presek&=i.sez
-                if presek:
-                    slo[Ali]={Ali(
-                        In(*tuple(set().union(*tuple(i.sez-presek for i in slo[Ali])))),
-                        *tuple(presek)
-                        )}
-                
+                    for j in slo.values():
+                        for k in j:
+                            if k in i.sez:
+                                menjave[i]=0
+                            elif Neg(k) in i.sez:
+                                menjave[i]=i.sez-{Neg(k)}
+                slo[Ali]={(Ali(*tuple(menjave[i])).poenostavi(cnf) if menjave[i]!=0 else None ) if i in menjave else i for i in slo[Ali]} - {None}
+
+                #po absorpciji je treba tipe podizrazov posodobiti
+                pomo=[]
+                for i in slo[Ali]:
+                    if type(i)!=Ali:
+                        pomo.append(i)
+                        if type(i) in slo: slo[type(i)].add(i)
+                        else: slo[type(i)]={i}
+                for i in pomo: 
+                    slo[Ali].remove(i)
+                    
+            #distributivnost
+                        
+                if len(slo[Ali])>1 and not cnf:
+                    presek = 42
+                    for i in slo[Ali]:
+                        if presek==42:
+                            presek={j for j in i.sez}
+                        else:
+                            presek&=i.sez
+                    if presek:
+                        slo[Ali]={Ali(
+                            In(*tuple(set().union(*tuple(i.sez-presek for i in slo[Ali])))),
+                            *tuple(presek)
+                            )}
+                    
 
         #sestavi poenostavljen izraz
         mn=set()
@@ -300,12 +302,12 @@ class Ali():
     def kopija(self):
         return Ali(*tuple(i.kopija() for i in self.sez))
     
-    def poenostavi(self,cnf=False):
+    def poenostavi(self,cnf=False,chff=False):
         if len(self.sez)==0: return F()
-        elif len(self.sez)==1: return self.kopija().sez.pop().poenostavi(cnf)
+        elif len(self.sez)==1: return self.kopija().sez.pop().poenostavi(cnf,chff)
         slo = {}
         for i in self.kopija().sez:
-            i=i.poenostavi(cnf)
+            i=i.poenostavi(cnf,chff)
             if type(i)==T: return T()
             elif type(i)==F: pass
             elif type(i) in slo:
@@ -313,64 +315,64 @@ class Ali():
             else:
                 slo[type(i)]={i}
 
-        #če imaš Ali znotraj Ali, ju lahko združiš
-        if Ali in slo.keys():
-            for j in slo[Ali]:
-                for i in j.sez:
-                    if type(i) in slo: slo[type(i)].add(i)
-                    else: slo[type(i)]={i}
-      
-            del slo[Ali]
-        
-        #complementary law
-        if Neg in slo.keys():
-            for i in slo[Neg]:
-                for j in slo.values():
-                    if i.izr in j:
-                        return T()
+        if not chff:
+            #če imaš Ali znotraj Ali, ju lahko združiš
+            if Ali in slo.keys():
+                for j in slo[Ali]:
+                    for i in j.sez:
+                        if type(i) in slo: slo[type(i)].add(i)
+                        else: slo[type(i)]={i}
+          
+                del slo[Ali]
+            
+            #complementary law
+            if Neg in slo.keys():
+                for i in slo[Neg]:
+                    for j in slo.values():
+                        if i.izr in j:
+                            return T()
 
-        #absorpcija in common identities in distributivnost
-        if In in slo.keys():
-            menjave={}
-            for i in slo[In]:
-                for j in slo.values():
-                    for k in j:
-                        if k in i.sez: #absorpcija
-                            menjave[i]=0
-                        elif Neg(k) in i.sez: #common id
-                            menjave[i]=i.sez-{Neg(k)}
-            slo[In]={(In(*tuple(menjave[i])).poenostavi(cnf) if menjave[i]!=0 else None ) if i in menjave else i for i in slo[In]} - {None}
-
-            #po absorpciji je treba tipe podizrazov posodobiti
-            pomo = []
-            for i in slo[In]:
-                if type(i)!=In:
-                    pomo.append(i)
-                    if type(i) in slo: slo[type(i)].add(i)
-                    else: slo[type(i)]={i}
-            for i in pomo: 
-                slo[In].remove(i) 
-        
-            #distributivnost
-            if len(slo[In])>1:
-                presek = 42
+            #absorpcija in common identities in distributivnost
+            if In in slo.keys():
+                menjave={}
                 for i in slo[In]:
-                    if presek==42:
-                        presek={j for j in i.sez}
-                    else:
-                        presek&=i.sez
-                if presek:
-                    slo[In]={In(
-                        Ali(*tuple(set().union(*tuple(i.sez-presek for i in slo[In])))),
-                        *tuple(presek)
-                        )}
+                    for j in slo.values():
+                        for k in j:
+                            if k in i.sez: #absorpcija
+                                menjave[i]=0
+                            elif Neg(k) in i.sez: #common id
+                                menjave[i]=i.sez-{Neg(k)}
+                slo[In]={(In(*tuple(menjave[i])).poenostavi(cnf) if menjave[i]!=0 else None ) if i in menjave else i for i in slo[In]} - {None}
 
-            if cnf:
-                a = min(slo[In],key=lambda x:len(x.sez))
-                return In(*tuple(Ali(x,*tuple(set().union(*tuple(slo.values()))-{a})) for x in a.sez)).poenostavi(True)
-                    
-       
-        
+                #po absorpciji je treba tipe podizrazov posodobiti
+                pomo = []
+                for i in slo[In]:
+                    if type(i)!=In:
+                        pomo.append(i)
+                        if type(i) in slo: slo[type(i)].add(i)
+                        else: slo[type(i)]={i}
+                for i in pomo: 
+                    slo[In].remove(i) 
+            
+                #distributivnost
+                if len(slo[In])>1:
+                    presek = 42
+                    for i in slo[In]:
+                        if presek==42:
+                            presek={j for j in i.sez}
+                        else:
+                            presek&=i.sez
+                    if presek:
+                        slo[In]={In(
+                            Ali(*tuple(set().union(*tuple(i.sez-presek for i in slo[In])))),
+                            *tuple(presek)
+                            )}
+
+                if cnf:
+                    a = min(slo[In],key=lambda x:len(x.sez))
+                    return In(*tuple(Ali(x,*tuple(set().union(*tuple(slo.values()))-{a})) for x in a.sez)).poenostavi(True)
+                        
+         
 
         mn=set()
         for i in slo.values():
@@ -407,41 +409,4 @@ primer4 = In(In(p,q),In(q,r),In(r,p))
 
 primer5 = In(Ali(p,q),Ali(q,r),Ali(r,p),Neg(In(p,q)),Neg(In(q,r)),Neg(In(r,p)))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
 
