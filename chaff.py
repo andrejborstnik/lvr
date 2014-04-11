@@ -104,19 +104,23 @@ def pchaff(formula,debug):
     def sklepaj(novi,a):
         """Po ugibanju tranzitivno naredi sklepe, ki iz njega sledijo"""
         temp = []
-        for lit in novi:
+        for lit,stavek in novi:
             sklepi[a].add(lit)
+            vzrok[lit] = stavek
             literali[lit]=-abs(literali[lit])   #frekvenci spremeni predznak, da vemo da je že izbran - zato ga ne izberemo še enkrat
             literali[neg(lit)]=-abs(literali[neg(lit)])
+            
+        for lit,_ in novi:
             x = ime(lit)
             if type(lit)==Spr:
-                if vrednost[x] == False: return "konflikt",lit   #prišlo je do konflikta
+                if vrednost[x] == False:
+                    print("A");return "konflikt",lit   #prišlo je do konflikta
                 elif vrednost[x] == None:
                     vrednost[x]=True
                     if neg(lit) in kontrolniOd: temp = menjaj(neg(lit),temp)
                     
             elif type(lit)==Neg:
-                if vrednost[x]: return "konflikt",lit   #prišlo je do konflikta
+                if vrednost[x]: print("B");return "konflikt",lit   #prišlo je do konflikta
                 elif vrednost[x] == None:
                     vrednost[x]=False
                     if neg(lit) in kontrolniOd: temp = menjaj(neg(lit),temp)
@@ -145,11 +149,9 @@ def pchaff(formula,debug):
                         kontrolniOd[l].remove(stavek)
                         break
                 if not najden and v==None:
-                    temp.append(drugi)
-                    vzrok[drugi] = [t for t in stavek.sez if t!=drugi]
+                    temp.append((drugi,[i for i in stavek.sez if i!=drugi]))
             elif v==False:
-                vzrok[l] = [t for t in stavek.sez if t!=l]
-                return "konflikt",l
+                print("C");return "konflikt",l
         if kontrolniOd[l]==[]: del kontrolniOd[l]
         return temp
 
@@ -182,7 +184,7 @@ def pchaff(formula,debug):
 
     def konstavek(lit):
         """vrne nov stavek, ki prepreči ponavljanje iste napake """
-        nabor = vzrok.get(neg(lit),[])+vzrok.get(neg(lit),[])
+        nabor = vzrok.get(neg(lit),[])+vzrok.get(lit,[])
         c= True
         while c:
             c = False
@@ -326,10 +328,11 @@ def pchaff(formula,debug):
         #print(a, ugibanja)
         if not a:
             return vrednost #vsi literali imajo vrednost
+        #print("ugibam",a)
         ugibanja.append(a)
         proban[ime(a)]=proban.get(ime(a),0)+1
         sklepi[a]=set()
-        novi = [a]
+        novi = [(a,[])]
         while novi and novi[0]!="konflikt":
             novi = sklepaj(novi,a)
         #print(ugibanja, sklepi[a])
@@ -339,17 +342,27 @@ def pchaff(formula,debug):
             print("Stanje po ugibanju in sklepanju:")
             analiza()
             print()
-            
 
+        #print("sklepi =",sklepi)
+        #print("vzročno drevo =", vzrok)
         #print(sklepi)
         if novi and novi[0]=="konflikt":     #treba trackat backat
-            #print(konstavek(novi[1]))
+            #print("kons = ",konstavek(novi[1]))
+            if form.vstavi(vrednost).poenostavi()!=F():
+                print("goriiiiiiiiiiiiiiiiiiiiiiiiiii")
+                print(novi[1])
+                stavki = kontrolniOd[novi[1]]
+                for i in stavki:
+                    print(i,kontrolni[i])
+                print(vrednost)
             ugibanja = resiproblem(ugibanja)
             if debug:
                 print("Stanje po sestopanju:")
                 analiza()
                 print()
             if ugibanja == "konec": return "Formula ni izpolnljiva"
+
+        #print()
     
 prim = In(Ali(Spr("x"),Spr("z")),Ali(Spr("x"),Spr("u")),Ali(Spr("x"),Spr("v")),Ali(Neg(Spr("x")),Neg(Spr("y"))),Ali(Neg(Spr("x")),Spr("y")))
                 

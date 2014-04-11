@@ -7,6 +7,9 @@ from util import primer
 t1 = [[0,0,4,0],[0,2,0,3],[2,0,0,0],[0,4,0,1]]
 t2 = [[0,0,0,0],[0,2,0,3],[2,0,0,0],[0,0,0,1]]
 
+def prazna(n):
+    return [[0]*n for i in range(n)]
+
 def barvanje(g,k):
     """Ali lahko graf podan s slovarjem g pobarvamo s k barvami? """
     def sprem(v,b):
