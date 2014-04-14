@@ -15,7 +15,7 @@ def chaff(formula, time = False, debug=False):
 
 def pchaff(formula,debug):
 
-    ########################## ZAČETNO ČIŠČENJE ####################################################
+########################## ZAČETNO ČIŠČENJE ####################################################
 
     def ime(lit):
         return lit.ime if type(lit)==Spr else lit.izr.ime
@@ -62,7 +62,7 @@ def pchaff(formula,debug):
     #Ostali so nam le Ali-ji dolžine 2 in več
 
     
-    ############################ NEKATERE DEFINICIJE #####################################################################
+############################ NEKATERE DEFINICIJE #####################################################################
     
     proban = {}                                             #ključi so imena spremenljivk. 1 - v eno smer proban, 2 - obe možnosti že preizkušeni
     kontrolni = {}                                          #ključi so stavki. za vsak stavek kateri literali so v njem kontrolni
@@ -91,7 +91,7 @@ def pchaff(formula,debug):
 
     stliteralov = len(literali)
             
-    ################################ POMOŽNE FUNKCIJE ######################################################################
+################################ POMOŽNE FUNKCIJE ######################################################################
     def ugibaj():
         """izbere literal brez določene vrednosti, ki je najpogostejši"""
         y = max(literali,key= lambda x: literali[x])
