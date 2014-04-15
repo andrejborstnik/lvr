@@ -3,8 +3,8 @@ lvr
 **Avtorja:** _Tomaž Stepišnik Perdih_ in _Andrej Borštnik_
 ***
 
-Na tem repozituriju se nahajajo SAT solverji (z spremljajočo mehanizacijo), za potrebe predmeta LVR
-na FMF.
+Na tem repozituriju se nahajajo SAT solverji (z spremljajočo mehanizacijo), za SAT solver in nekatere prevedbe problemov na SAT.
+
 ***
 **Kazalo:**
 
@@ -45,7 +45,13 @@ formula = sudoku(tabela)
 resitev = resitelj(formula)
 prikazi(resitev) #samo za sudoku
 ```
-Za reševanje sudokuja sva pripravila priročno funkcijo, ki vso delo opravi sama (`resi_sudoku`).
-Če želite demonstracijo, poženite _demo.py_, ali pa kličite `demo()` v IDLE-u.
+Za reševanje sudokuja sva pripravila priročno funkcijo, ki vse delo opravi sama (`resi_sudoku`).
+Če želite demonstracijo, poženite _demo.py_, ali pa kličite `demo()`, v IDLE-u.
 
+***
+**Lastnosti, prednosti in slabosti:**
+
+1. `chaff` prehitro zavrže valuacije, ki bi lahko bile prave. Če pa vrne valuacijo je ta pravilna.
+2. `resitelj` je lahko zelo hiter, če izbira prave spremenljivke. Pomembno je, da so parametri (izbira podobno, kot Chaff) dobro nastavljeni.
+3. `poenostavi` ima samo tri možnosti (cnf, dnf in samo krajšanje True/False). Zato ga je zelo zamudno poganjati, tudi na formulah blizu cnf/dnf. `resitelj` in `chaff` zato trenutno predpostavita, da je formula, ki jo dobita že v cnf (lahko ima samo vgnezdene Ali-je oz. In-e).
 
