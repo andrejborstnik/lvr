@@ -4,13 +4,12 @@ from time import *
 from random import *
 from prevedbe import *
 
-
 def resitelj(formula, time = False):
     t = clock()
     a = presitelj(formula)
     t1 = clock()
     if time:
-        print(t1-t)
+        print("Porabljen čas:",t1-t)
     return a
 
 def presitelj(formula):
@@ -75,21 +74,25 @@ def presitelj(formula):
         
     #poiščemo vse literale v naši formuli
     for stavek in form.sez:
+        n = len(stavek.sez)
         for lit in stavek.sez:
-            literali[lit]=literali.get(lit,0)+1
+            literali[lit]=literali.get(lit,0)+10/n
             literali[neg(lit)] = literali.get(neg(lit),0)
             stavki[lit] = stavki.get(lit,[])+[stavek]
             stavki[neg(lit)] = stavki.get(neg(lit),[])
 
     stliteralov = len(literali)
-    perioda = stliteralov//2
+    perioda = 100
+    koef = 2
     stevec = 0
+    cas = 0
             
 ################################ POMOŽNE FUNKCIJE ######################################################################
     def ugibaj():
         """Izbere literal brez določene vrednosti, ki je najpogostejši."""
-        y = max(literali,key= lambda x: literali[x])
-        if literali[y]<=0:
+        y = max(literali,key= lambda x: literali[x]+(random() if literali[x]>0 else -random()))
+        
+        if literali[y]<=0.0:
             return None
         else:
             vzrok[y] = []
@@ -221,25 +224,39 @@ def presitelj(formula):
             #print(ugibanja,"kons=",kons)
             ugibanja = resiproblem(ugibanja,kons)
             if ugibanja == "konec": return "Formula ni izpolnljiva"
-            if len(kons.sez)==1:
-                print("šmorn")
-            else:
-                for i in kons.sez:
-                    stavki[i].append(kons)
-                    if stevec==perioda:
-                        stevec=0
-                        for x in literali:
-                            literali[x]/=5
-                        if literali[i]>0 or literali[neg(i)]>0: literali[i]+=1
-                        else: literali[i]-=1
+            for i in kons.sez:
+                stavki[i].append(kons)
+                if stevec==perioda:
+                    stevec=0
+                    for x in literali:
+                        literali[x]/=koef
+                if literali[i]>0 or literali[neg(i)]>0: literali[i]+=10/len(kons.sez)
+                else: literali[i]-=10/len(kons.sez)
 
     
 prim1 = In(Ali(Spr("x"),Spr("z")),Ali(Spr("x"),Spr("u")),Ali(Spr("x"),Spr("v")),Ali(Neg(Spr("x")),Neg(Spr("y"))),Ali(Neg(Spr("x")),Spr("y")))
                 
-                
-        
-                
-                
+
+##x = latinski(prazna(6));
+##print("n=",6,x.vrednost(resitelj(x,True)))
+##print()
+##
+##x = latinski(prazna(7));
+##y = resitelj(x,True)
+##print("n=",7,x.vrednost(y))
+
+##                
+##l= sudoku(lahek)
+##print("Lahek: ", l.vrednost(resitelj(l,True)))
+##print()
+
+##s= sudoku(sreden)
+##print("Sreden: ", s.vrednost(resitelj(s,True)))
+##print()
+##
+##z= sudoku(zloben)
+##print("Zloben: ", z.vrednost(resitelj(z,True)))
+
                     
 
 
