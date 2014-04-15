@@ -80,7 +80,10 @@ class Spr():
         if self.ime in slo.keys():
             if slo[self.ime]:
                 return T()
-            return F()
+            elif slo[self.ime]==False:
+                return F()
+            else:
+                return self
         return self
 
     def kopija(self):
