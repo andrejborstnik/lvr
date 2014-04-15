@@ -119,7 +119,7 @@ def resit(rezultat,n):
     barve = [None]*n
     rezultat = eval(sub(r"(\")+",r"\"",str(rezultat)))
     for i in rezultat.keys():
-        j = eval(i)
+        j = eval(sub(r"([a-zA-Z]+)",r"'\1'",i))
         if rezultat[i]:
             resitev[j[0]][j[1]]=j[2]
     return resitev
