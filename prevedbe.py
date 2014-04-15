@@ -1,5 +1,5 @@
 from booli import *
-from solver import *
+from bf_dpll import *
 from chaff import *
 from re import sub
 from util import primer
@@ -151,120 +151,6 @@ def sudoku(tabela1):#tale pa kao ni izpolnjiv za t(tudi tale mee errorje). lahko
     f5 = In(*tuple(Sprem(i,j,tabela[i][j]) if tabela[i][j] not in [0, "0","None",None] else T() for i in range(n) for j in range(n)))
 
     return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez | f5.sez))
-
-
-def sudoku4(tabela1):#tale sudoku pa vrne error na t (včasih. ko deletaš probane je bil key error in error, da i nima spremenljivk) in prav tako vrne valuacijo, ki ni true
-    #boljša prevedba sudoku na sat
-    n = len(tabela1)
-    k = int(n**0.5)
-    def Sprem(u,v,n):
-        return Spr("C({0},{1},{2})".format(u,v,n))
-
-    spr = set()
-    imena = [None]*n
-    obrimena = {}
-    st = 0
-    tabela = [[j if j not in ["0","None"] else 0 for j in i] for i in tabela1]
-    for i in range(n):
-        for j in range(n):
-            if tabela[i][j] not in [0, "0","None",None] and tabela[i][j] not in spr:
-                imena[st] = tabela[i][j]
-                obrimena[tabela[i][j]] = st
-                st+=1
-                spr.add(tabela[i][j])
-
-    #v vsaki vrstici je vsaka številka na vsaj enem polju
-    f1 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for j in range(n)))for i in range(n) for l in range(1,n+1)))
-
-    #v vsakem stolpcu je vsaka številka na vsaj enem polju
-    f2 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for i in range(n)))for j in range(n) for l in range(1,n+1)))
-
-    #v vsakem kvadratku je vsaka številka na vsaj enem polju
-    f3 = In(*tuple(Ali(*tuple(Sprem(i//k+j//k,i%k+j%k,imena[l-1]) for j in range(n)))for i in range(n) for l in range(1,n+1)))
-
-    #če je na polju neko število, potem drugih števil ni
-    f4 = In(*tuple(Ali(Neg(Sprem(i,j,imena[l-1])),Neg(Sprem(i,j,imena[z-1]))) for i in range(n) for j in range(n) for l in range(1,n+1) for z in (set(range(1,n+1))-{l})))
-
-    return In(f1,f2,f3,f4).poenostavi()
-
-def sudoku3(tabela1):#naj ostane, da preverimo če tchaff dela
-    #boljša prevedba sudoku na sat
-    n = len(tabela1)
-    k = int(n**0.5)
-    def Sprem(u,v,n):
-        return Spr("C({0},{1},{2})".format(u,v,n))
-
-    spr = set()
-    imena = [None]*n
-    obrimena = {}
-    st = 0
-    tabela = [[j if j not in ["0","None"] else 0 for j in i] for i in tabela1]
-    for i in range(n):
-        for j in range(n):
-            if tabela[i][j] not in [0, "0","None",None] and tabela[i][j] not in spr:
-                imena[st] = tabela[i][j]
-                obrimena[tabela[i][j]] = st
-                st+=1
-                spr.add(tabela[i][j])
-
-    #v vsaki vrstici je vsaka številka na vsaj enem polju
-    f1 = In(*tuple(Ali(*tuple(Sprem(imena[i],imena[j],l) for j in range(n)))for i in range(n) for l in range(1,n+1)))
-
-    #v vsakem stolpcu je vsaka številka na vsaj enem polju
-    f2 = In(*tuple(Ali(*tuple(Sprem(imena[i],imena[j],l) for i in range(n)))for j in range(n) for l in range(1,n+1)))
-
-    #v vsakem kvadratku je vsaka številka na vsaj enem polju
-    f3 = In(*tuple(Ali(*tuple(Sprem(imena[i//k+j//k],imena[i%k+j%k],l) for j in range(n)))for i in range(n) for l in range(1,n+1)))
-
-    #če je na polju neko število, potem drugih števil ni
-    f4 = In(*tuple(Ali(Neg(Sprem(imena[i],imena[j],l)),Neg(Sprem(imena[i],imena[j],z))) for i in range(n) for j in range(n) for l in range(1,n+1) for z in (set(range(1,n+1))-{l})))
-
-    return In(f1,f2,f3,f4).poenostavi()
-
-##a = tchaff(sudoku1(t))
-##c = [a if i else "0" for (a,i) in a.items()]
-##d= [[None]*4 for i in range(4)]
-##for i in range(4):
-##    for j in range(4):
-##        for k in range(1,5):
-##            if "C({0},{1},{2})".format(i,j,k) in c:
-##                d[i][j]=k
-    
-
-def sudoku2(tabela1):
-    #v poenostavljeni obliki je formula majhna, vendar je v cnf ogromna.
-    n = len(tabela1)
-    k = int(n**0.5)
-    def Sprem(u,v,n):
-        return Spr("C,{0},{1},{2}".format(u,v,n))
-
-    spr = set()
-    imena = [None]*n
-    obrimena = {}
-    st = 0
-    tabela = [[j if j not in ["0","None"] else 0 for j in i] for i in tabela1]
-    for i in range(n):
-        for j in range(n):
-            if tabela[i][j] not in [0, "0","None",None] and tabela[i][j] not in spr:
-                imena[st] = tabela[i][j]
-                obrimena[tabela[i][j]] = st
-                st+=1
-                spr.add(tabela[i][j])
-
-    f = [0]*(3*n)
-    for i in range(n):
-        #vrstice. nobena dva nimata enake vrednosti
-        f[i] = In(*tuple(Ali(*tuple(In(Sprem(i,j,l),*tuple(Neg(Sprem(i,z,l))if z!=j else T() for z in range(n))) for l in range(1,n+1))) for j in range(n)))
-
-        #stoplci
-        f[i+n] = In(*tuple(Ali(*tuple(In(Sprem(j,i,l),*tuple(Neg(Sprem(z,i,l))if z!=j else T() for z in range(n))) for l in range(1,n+1))) for j in range(n)))
-
-        #kvadratki
-        a = i//k
-        b = i%k
-        f[i+2*n] = In(*tuple(Ali(*tuple(In(Sprem(a+j//k,b+j%k,l),*tuple(Neg(Sprem(a+z//k,b+z%k,l))if z!=j else T() for z in range(n))) for l in range(1,n+1))) for j in range(n)))
-            
-    return In(*tuple(i for i in f)).poenostavi()
 
 def sudoku1(tabela1):
     """ Prevede sudoku na sat preko barvanja grafa. """

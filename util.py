@@ -1,5 +1,21 @@
 from booli import *
 
+########## Nastavljiva errorja ################
+
+class UsageError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return self.value
+
+class InternalError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return self.value
+
+#########################################
+
 def cista(formula,i):
     #dobi spremenljivko i pove ali v formuli nastopa čisto
     form = repr(formula.poenostavi())
@@ -44,24 +60,10 @@ class Kopica:
             del self.sez[len(self.sez) - 1]
             self.spusti(0)
             return najmanjsi
-        raise UsageError("Ne moramo odstraniti elementa prazne kopice.")
+        raise InternalError("Ne moramo odstraniti elementa prazne kopice.")
 
     def prazna(self):
         return len(self.sez) == 0
-
-########## Nastavljiv error ################
-
-class UsageError(Exception):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return self.value
-
-class InternalError(Exception):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return self.value
 
 
 
@@ -82,7 +84,7 @@ class Sklad():
 
     def odstrani(self):
         if self.prazen():
-            raise UsageError("Ne moramo odstraniti elementov iz praznega sklada.")
+            raise InternalError("Ne moramo odstraniti elementov iz praznega sklada.")
         self.head -= 1
         return self.sklad[self.head+1]
 

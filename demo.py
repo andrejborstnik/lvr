@@ -3,7 +3,7 @@ from demo_util import *
 import sys
 from time import sleep
 
-def demoo():
+def demo():
     cas1 = 3
     cas2 = 0.5
     try:
@@ -19,7 +19,7 @@ def demoo():
               " se v ustreznem formatu zapiše v datoteko, ali pa se lepo izpiše v datoteko."+
               " Opomba: podana datoteka mora obstajati, sicer se algoritem ne bo izvedel."
               " Prav tako si lahko izberemo, s katerim algoritmom bomo reševali problem. Trenutno so na voljo"+
-              " naslednji algoritni: DPLL, chaff in bfSAT. ")
+              " naslednji algoritmi: DPLL, resitelj in bfSAT. ")
 
         print("\n")
         
@@ -79,8 +79,8 @@ def demoo():
         except:
             print("\nUnexpected error:", sys.exc_info()[0])
             print("Prosiva, da poročate o okoliščinah, pri katerih je prišlo do te napake.\nHvala!\n")
-            raise
+            continue
     return None
-demoo()
+demo()
     
 

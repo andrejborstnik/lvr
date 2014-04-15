@@ -3,6 +3,8 @@ from util import *
 from chaff import chaff
 from re import sub
 from os import path
+from bf_dpll import bfSAT, DPLL
+from resitelj import resitelj
 #a = sudoku([["Bla",None,None,None],["Kor",None,None,None],["AS",None,None,None],["MA",None,None,None]])
 
 def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver = "chaff", izpis_output_file=""):
@@ -14,7 +16,7 @@ def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver =
      V podani datoteki naj bo samo en sudoku in naj ne bo praznih vrstic."""
     if type(tabela)!= list:
         raise UsageError("Podan \"sudoku\" ni tabela.")
-    if solver not in ["DPLL","Chaff","bfSAT", "chaff"]:
+    if solver not in ["DPLL","resitelj","bfSAT", "chaff"]:
         raise UsageError("Podali ste solver, ki ni implementiran! (ali pa ste se zatipkali)")
     if not tabela:
         if not input_file:
@@ -228,8 +230,8 @@ def izp():
 def sol():
     solver = input("S katerim algoritmom zelite reševati problem?  ")
     if not solver:
-        solver = "chaff"
-    elif solver not in ["DPLL","chaff","bfSAT"]:
+        solver = "resitelj"
+    elif solver not in ["DPLL","resitelj","bfSAT"]:
         print("Algoritma \"{0}\" žal (še) nismo implementirali. Prosim, vnesite drug algoritem.".format(solver))
         return sol()
     return solver
