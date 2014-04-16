@@ -1,6 +1,7 @@
 from booli import *
 from bf_dpll import *
 from chaff import *
+from resitelj import resitelj
 from re import sub
 from util import primer
 
@@ -181,7 +182,7 @@ def sudoku(tabela1):#tale pa kao ni izpolnjiv za t(tudi tale mee errorje). lahko
     #nastavimo začetne vrednosti
     f5 = In(*tuple(Sprem(i,j,tabela[i][j]) if tabela[i][j] not in [0, "0","None",None] else T() for i in range(n) for j in range(n)))
 
-    return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez | f5.sez))
+    return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez | f5.sez)).poenostavi(chff=True)
 
 def sudoku1(tabela1):
     """ Prevede sudoku na sat preko barvanja grafa. """

@@ -1,5 +1,63 @@
 from booli import *
 
+########## Standardni cnf format ###############
+
+def zapisi(formula,file):
+    f = open(file, "w")
+    formula = formula.poenostavi(chff=True)
+    sp = formula.spremenljivke()
+    spr={}
+    obr = []
+    k = 1
+    f.write("p cnf {0} {1}\n".format(len(sp),len(formula.sez)))
+    for i in sp:
+        spr[i]=k
+        obr.append(i)
+        k+=1
+    for i in formula.sez:
+        s=""
+        if type(i)==Ali:
+            for j in i.sez:
+                if type(j)==Neg:
+                    s+="-{0} ".format(spr[j.izr.ime])
+                elif type(j)==Spr:
+                    s+="{0} ".format(spr[j.ime])
+            s+="0\n"
+            f.write(s)
+        elif type(i) in [Spr, Neg]:
+            if type(i)==Neg:
+                s+="-{0} ".format(spr[i.izr.ime])
+            else:
+                s+="{0} ".format(spr[i.ime])
+            s+="0\n"
+            f.write(s)
+        else:
+            print(i)
+    f.close()
+    return None
+    return obr
+
+def preberi(file):
+    f = open(file,"r",encoding="utf-8")
+    stavki = set()
+    fil = str(f.read())
+    lines=fil.split("\n")
+    i = 1
+    x=len(lines)
+    nasel = False
+    while i < x:
+        if lines[i] and lines[i][0]!="c":
+            if not nasel:
+                prva = lines[0].split(" ")
+                st_spr = int(prva[2])
+                st_sta=int(prva[3])
+                nasel=True
+            stavki.add(Ali(*tuple(Spr(k) if k[0]!="-" else Neg(Spr(k[1:])) for k in lines[i].split(" ")[:-1])))
+        i+=1
+        
+    f.close()
+    return In(*tuple(stavki))
+
 ########## Nastavljiva errorja ################
 
 class UsageError(Exception):
