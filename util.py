@@ -1,6 +1,6 @@
 from booli import *
 
-########## Standardni cnf format ###############
+########## Standardni cnf format (DIMACS) ###############
 
 def zapisi(formula,file):
     f = open(file, "w")
@@ -82,7 +82,7 @@ class InternalError(Exception):
 
 def cista(formula,i):
     #dobi spremenljivko i pove ali v formuli nastopa čisto
-    form = repr(formula.poenostavi())
+    form = repr(formula.poenostavi(chff=True))
     if ("¬"+i) in form:
         if (" "+i) in form or ("("+i) in form or form[0:len(i)]==i: #Če sta notri hkrati i in negacija i, potem ni čista. Sicer je.
             return False

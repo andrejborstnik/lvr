@@ -185,37 +185,6 @@ def prikazi(resitev,file=False):
         return None
     return file1
 
-
-def test(k,velikost = 70):
-    t1 = 0
-    t2 = 0
-    for i in range(k):
-        a = primer(n = velikost)
-        print(len(a.spremenljivke()))
-        b,t1a = DPLL(a,True)
-        c,t2a = chaff(a,True)
-        t1+=t1a
-        t2+=t2a
-        if b:
-            d = a.vstavi(b).poenostavi()
-        else:
-            d = a.poenostavi()
-        if c:
-            if type(c)!= str:
-                e = a.vstavi(c).poenostavi()
-            else:
-                e = F()
-        else:
-            e = a.poenostavi()
-        
-        if d != e:
-            print("NE DELAM PRAV!", d, e)
-            print("Časa: {0}, {1}".format(t1,t2))
-            print(a)
-            break
-    print("Časa: {0}, {1}".format(t1,t2))
-    return None
-
 def izp():
     izpisi = input("Ali naj sudoku lepo izpišem? (da/ne)  ")
     if izpisi and izpisi in "DAdaDaJAjaJaYESYesyes":
