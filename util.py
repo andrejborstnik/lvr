@@ -46,13 +46,19 @@ def preberi(file):
     x=len(lines)
     nasel = False
     while i < x:
-        if lines[i] and lines[i][0]!="c":
+        if lines[i] not in ["","%","0"] and lines[i][0]!="c":
+            pomo=[]
+            for z in lines[i].split(" "):
+                if z:
+                    pomo.append(z)
+            lines[i]=pomo
             if not nasel:
-                prva = lines[0].split(" ")
+                prva = lines[i]
                 st_spr = int(prva[2])
                 st_sta=int(prva[3])
                 nasel=True
-            stavki.add(Ali(*tuple(Spr(k) if k[0]!="-" else Neg(Spr(k[1:])) for k in lines[i].split(" ")[:-1])))
+            else:
+                stavki.add(Ali(*tuple(Spr(k) if k[0]!="-" else Neg(Spr(k[1:])) for k in lines[i][:-1])))
         i+=1
         
     f.close()
