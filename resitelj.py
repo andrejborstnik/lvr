@@ -70,40 +70,50 @@ def presitelj(formula):
     sklepi = {}                                             #ključi so literali. za vsako ugibanje kateri sklepi so sledili
     ugibanja = []                                           #vsebuje literale. zaporedje ugibanj
     naslednji = [False]                                     #vsebuje literal. če imamo določeno kaj probamo naslednje (ko pride do konflikta, se vrnemo do zadnje odločitve ne sprobane v obe smeri. S tem določimo da je naslednja na vrsti druga možnost za to ugibanje)
-    
+    izpolnjen = {}                                          #za vsak stavek v formuli pove ali je izpolnjen
+    ponastavi = {}                                          #pomožen slovar za ponastavljanje slovarja "izpolnjen"
         
     #poiščemo vse literale v naši formuli
     for stavek in form.sez:
         n = len(stavek.sez)
+        izpolnjen[stavek]=False
+        ponastavi[stavek]=False
         for lit in stavek.sez:
-            literali[lit]=literali.get(lit,0)+10/n
+            literali[lit]=literali.get(lit,0)+ 10/n
             literali[neg(lit)] = literali.get(neg(lit),0)
             stavki[lit] = stavki.get(lit,[])+[stavek]
             stavki[neg(lit)] = stavki.get(neg(lit),[])
 
     stliteralov = len(literali)
-    perioda = 100
-    koef = 2
-    stevec = 0
+    perioda1 = 40
+    perioda2 = 1000
+    koef = 0.5
+    stevec1 = 0
+    stevec2 = 0
+    ponastavitev=1
     cas = 0
             
 ################################ POMOŽNE FUNKCIJE ######################################################################
     def ugibaj():
         """Izbere literal brez določene vrednosti, ki je najpogostejši."""
-        y = max(literali,key= lambda x: literali[x]+(random() if literali[x]>0 else -random()))
+        y = max(literali,key= lambda x: literali[x] + (random()/2 if literali[x]>0 else 0))
         
         if literali[y]<=0.0:
             return None
         else:
             vzrok[y] = []
+            for stavek in stavki[y]:
+                izpolnjen[stavek]=True
             return y
         
     def sklepaj(novi,a):
         """Po ugibanju tranzitivno naredi sklepe, ki iz njega sledijo"""
         temp = []
-        for lit,stavek in novi:
+        for lit,zakaj in novi:
             sklepi[a].add(lit)
-            vzrok[lit] = stavek
+            vzrok[lit] = zakaj
+            for stavek in stavki[lit]:
+                izpolnjen[stavek]=True
             literali[lit]=-abs(literali[lit])   #frekvenci spremeni predznak, da vemo da je že izbran - zato ga ne izberemo še enkrat
             literali[neg(lit)]=-abs(literali[neg(lit)])
             
@@ -127,6 +137,8 @@ def presitelj(formula):
                 raise InternalError("Formula je v napačnem formatu.")
             
             if temp and temp[0]=="konflikt": return temp
+
+        #temp+=ciste()
         
         return temp
 
@@ -173,6 +185,12 @@ def presitelj(formula):
                 del proban[ime(ugibanja[odl])]
         naslednji[0] = neg(ugibanja[i])
         ugibanja = ugibanja[:i]
+        
+        izpolnjen.update(ponastavi)
+        for lit in vzrok:
+            for stavek in stavki[lit]:
+                izpolnjen[stavek]=True
+        
         return ugibanja
 
     def konstavek(lit):
@@ -200,6 +218,8 @@ def presitelj(formula):
         if naslednji[0]:
             a = naslednji[0]
             vzrok[a]=[]
+            for stavek in stavki[a]:
+                izpolnjen[stavek]=True
             naslednji[0]=False
         else:
             a = ugibaj()
@@ -220,30 +240,67 @@ def presitelj(formula):
         
         if novi and novi[0]=="konflikt":     #treba trackat backat
             kons = konstavek(novi[1])
-            stevec+=1
+            stevec1+=1
+            stevec2+=1
             #print(ugibanja,"kons=",kons)
             ugibanja = resiproblem(ugibanja,kons)
             if ugibanja == "konec": return "Formula ni izpolnljiva"
+            
+            if stevec1==perioda1:
+                #deli prioritete
+                stevec1=0
+                for x in literali:
+                    literali[x]/=koef
+
+            #dodamo konfliktni stavek
+            n = len(kons.sez)
             for i in kons.sez:
                 stavki[i].append(kons)
-                if stevec==perioda:
-                    stevec=0
-                    for x in literali:
-                        literali[x]/=koef
-                if literali[i]>0 or literali[neg(i)]>0: literali[i]+=10/len(kons.sez)
-                else: literali[i]-=10/len(kons.sez)
+                if literali[i]>0 or literali[neg(i)]>0: literali[i]+=10/n
+                else: literali[i]-=10/n
+                
+            if stevec2==(perioda2*luby(ponastavitev)):
+                #naredi restart, znanje pridobljeno s konfliktnimi stavki ostane
+                print("restart")
+                stevec2=0
+                ponastavitev+=1
+                naslednji = [False]
+                vzrok = {}                                              
+                sklepi = {}                                           
+                ugibanja = []
+                izpolnjenost = {}
+                proban = {}
+                for i in literali:
+                    vrednost[ime(i)]=None
+                for lit in literali:
+                    literali[lit]=0
+                    for st in stavki[lit]:
+                        literali[lit]+=10/len(st.sez)
+
+
+        for stavek in izpolnjen:
+            ok = False
+            for lit in stavek.sez:
+                if vred(lit)!=False:
+                    ok=True
+                    break
+            if not ok:
+                print("ogenj v strehi")
+                
+                
+            
 
     
 prim1 = In(Ali(Spr("x"),Spr("z")),Ali(Spr("x"),Spr("u")),Ali(Spr("x"),Spr("v")),Ali(Neg(Spr("x")),Neg(Spr("y"))),Ali(Neg(Spr("x")),Spr("y")))
                 
 
-##x = latinski(prazna(6));
-##print("n=",6,x.vrednost(resitelj(x,True)))
-##print()
-##
-##x = latinski(prazna(7));
-##y = resitelj(x,True)
-##print("n=",7,x.vrednost(y))
+x = latinski(prazna(6));
+print("n=",6,x.vrednost(resitelj(x,True)))
+print()
+
+x = latinski(prazna(7));
+y = resitelj(x,True)
+print("n=",7,x.vrednost(y))
 
 ##                
 ##l= sudoku(lahek)

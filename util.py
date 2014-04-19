@@ -1,4 +1,17 @@
 from booli import *
+from math import log
+
+
+########## Lubyjevo zaporedje ############
+
+def luby(i):
+    l = log(i+1,2)
+    k = int(l)
+    if k==l:
+        return 2**(k-1)
+    else:
+        return luby(i+1 - 2**k)
+
 
 ########## Standardni cnf format (DIMACS) ###############
 

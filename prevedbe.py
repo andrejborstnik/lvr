@@ -130,19 +130,22 @@ def latinski(tabela1):
     st = 0
     imena = [imena[i-1] if imena[i-1] else i for i in range(1,n+1)]
 
+    #v vsakem polju vsaj ena številka
+    f1 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for l in range(1,n+1)))for i in range(n) for j in range(n)))
+
     #v vsaki vrstici je vsaka številka na vsaj enem polju
-    f1 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for j in range(n)))for i in range(n) for l in range(1,n+1)))
+    f2 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for j in range(n)))for i in range(n) for l in range(1,n+1)))
 
     #v vsakem stolpcu je vsaka številka na vsaj enem polju
-    f2 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for i in range(n)))for j in range(n) for l in range(1,n+1)))
+    f3 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for i in range(n)))for j in range(n) for l in range(1,n+1)))
 
     #če je na polju neko število, potem drugih števil ni
-    f3 = In(*tuple(Ali(Neg(Sprem(i,j,imena[l-1])),Neg(Sprem(i,j,imena[z-1]))) for i in range(n) for j in range(n) for l in range(1,n+1) for z in (set(range(1,n+1))-{l})))
+    f4 = In(*tuple(Ali(Neg(Sprem(i,j,imena[l-1])),Neg(Sprem(i,j,imena[z-1]))) for i in range(n) for j in range(n) for l in range(1,n+1) for z in (set(range(1,n+1))-{l})))
 
     #nastavimo začetne vrednosti
-    f4 = In(*tuple(Sprem(i,j,tabela[i][j]) if tabela[i][j] not in [0, "0","None",None] else T() for i in range(n) for j in range(n)))
+    f5 = In(*tuple(Sprem(i,j,tabela[i][j]) if tabela[i][j] not in [0, "0","None",None] else T() for i in range(n) for j in range(n)))
 
-    return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez))
+    return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez | f5.sez))
 
 
 def sudoku(tabela1):#tale pa kao ni izpolnjiv za t(tudi tale mee errorje). lahko sicer, da sem se kaj zmotil
@@ -166,22 +169,25 @@ def sudoku(tabela1):#tale pa kao ni izpolnjiv za t(tudi tale mee errorje). lahko
     st = 0
     imena = [imena[i-1] if imena[i-1] else i for i in range(1,n+1)]
 
+    #v vsakem polju vsaj ena številka
+    f1 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for l in range(1,n+1)))for i in range(n) for j in range(n)))
+
     #v vsaki vrstici je vsaka številka na vsaj enem polju
-    f1 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for j in range(n)))for i in range(n) for l in range(1,n+1)))
+    f2 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for j in range(n)))for i in range(n) for l in range(1,n+1)))
 
     #v vsakem stolpcu je vsaka številka na vsaj enem polju
-    f2 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for i in range(n)))for j in range(n) for l in range(1,n+1)))
+    f3 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for i in range(n)))for j in range(n) for l in range(1,n+1)))
 
     #v vsakem kvadratku je vsaka številka na vsaj enem polju
-    f3 = In(*tuple(Ali(*tuple(Sprem(k*(i//k)+j//k,k*(i%k)+j%k,imena[l-1]) for j in range(n)))for i in range(n) for l in range(1,n+1)))
+    f4 = In(*tuple(Ali(*tuple(Sprem(k*(i//k)+j//k,k*(i%k)+j%k,imena[l-1]) for j in range(n)))for i in range(n) for l in range(1,n+1)))
 
     #če je na polju neko število, potem drugih števil ni
-    f4 = In(*tuple(Ali(Neg(Sprem(i,j,imena[l-1])),Neg(Sprem(i,j,imena[z-1]))) for i in range(n) for j in range(n) for l in range(1,n+1) for z in (set(range(1,n+1))-{l})))
+    f5 = In(*tuple(Ali(Neg(Sprem(i,j,imena[l-1])),Neg(Sprem(i,j,imena[z-1]))) for i in range(n) for j in range(n) for l in range(1,n+1) for z in (set(range(1,n+1))-{l})))
 
     #nastavimo začetne vrednosti
-    f5 = In(*tuple(Sprem(i,j,tabela[i][j]) if tabela[i][j] not in [0, "0","None",None] else T() for i in range(n) for j in range(n)))
+    f6 = In(*tuple(Sprem(i,j,tabela[i][j]) if tabela[i][j] not in [0, "0","None",None] else T() for i in range(n) for j in range(n)))
 
-    return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez | f5.sez)).poenostavi(chff=True)
+    return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez | f5.sez | f6.sez)).poenostavi(chff=True)
 
 def sudoku1(tabela1):
     """ Prevede sudoku na sat preko barvanja grafa. """
