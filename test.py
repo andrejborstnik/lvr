@@ -1,6 +1,8 @@
 from booli import *
 from util import *
-from bf_dpll import DPLL
+from chaff import chaff
+from prevedbe import *
+from bf_dpll import DPLL, bfSAT
 from resitelj import resitelj
 from time import clock
 
@@ -10,7 +12,10 @@ def test(n, file, printaj=False, sat = True):
     for i in range(1,n+1):
         a = preberi("{0}-0{1}.cnf".format(file,i)).poenostavi(chff=True)
         t1=clock()
+
+        #reševanje -> tu lahko spremeniš algoritem
         b = resitelj(a)
+        
         t2=clock()
         if sat:
             if a.vstavi(b).poenostavi()!=T():
@@ -22,7 +27,8 @@ def test(n, file, printaj=False, sat = True):
         if printaj: print("Porabljen čas:  {0}".format(t2-t1))
     return t
 
-rez = test(1000,"./primeri_50/uf50")
+#rez = test(10,"./primeri_100/uf100")
+#print(rez)
     
 def test1(k,velikost = 70):
     t1=0
@@ -30,6 +36,8 @@ def test1(k,velikost = 70):
     for i in range(k):
         a = primer(n = velikost).poenostavi(True)
         print("Velikost:  {0}".format(len(a.spremenljivke())))
+
+        #primerja algoritme. Poljubo preuredi. Ne preverja pravilnosti.
         t1a = clock()
         b = DPLL(a,True)
         t1b=clock()
@@ -37,22 +45,6 @@ def test1(k,velikost = 70):
         t2b=clock()
         t1+=t1b-t1a
         t2+=t2b-t1b
-        if b:
-            d = a.vstavi(b).poenostavi()
-        else:
-            d = a.poenostavi()
-        if c:
-            if type(c)!= str:
-                e = a.vstavi(c).poenostavi()
-            else:
-                e = F()
-        else:
-            e = a.poenostavi()
         
-        if d != e:
-            print("NE DELAM PRAV!", d, e)
-            print("Časa: {0}, {1}".format(t1,t2))
-            print(a)
-            break
     print("Časa: {0}, {1}".format(t1,t2))
     return None

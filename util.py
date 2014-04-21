@@ -93,6 +93,16 @@ class InternalError(Exception):
 
 #########################################
 
+def najpogostejsi(formula):
+    #za vsako spremenljivko v formuli prešteje kolikokrat se pojavi.
+    #predpostavi, da je formula v cnf
+    pojavitve={}
+    for i in formula.sez:
+        for j in i.sez:
+            pojavitve[j]=pojavitve.get(j,0)+1
+    return max(pojavitve.items(), key = lambda x: x[1])[0]
+    
+
 def cista(formula,i):
     #dobi spremenljivko i pove ali v formuli nastopa čisto
     form = repr(formula.poenostavi(chff=True))

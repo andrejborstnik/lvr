@@ -1,7 +1,7 @@
 from util import *
 from booli import *
-from time import *
-from random import *
+from time import clock
+from random import random
 from prevedbe import *
 
 def resitelj(formula, time = False):
@@ -294,13 +294,13 @@ def presitelj(formula):
 prim1 = In(Ali(Spr("x"),Spr("z")),Ali(Spr("x"),Spr("u")),Ali(Spr("x"),Spr("v")),Ali(Neg(Spr("x")),Neg(Spr("y"))),Ali(Neg(Spr("x")),Spr("y")))
                 
 
-x = latinski(prazna(6));
-print("n=",6,x.vrednost(resitelj(x,True)))
-print()
-
-x = latinski(prazna(7));
-y = resitelj(x,True)
-print("n=",7,x.vrednost(y))
+##x = latinski(prazna(6));
+##print("n=",6,x.vrednost(resitelj(x,True)))
+##print()
+##
+##x = latinski(prazna(7));
+##y = resitelj(x,True)
+##print("n=",7,x.vrednost(y))
 
 ##                
 ##l= sudoku(lahek)

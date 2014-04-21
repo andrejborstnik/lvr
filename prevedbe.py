@@ -1,6 +1,4 @@
 from booli import *
-from bf_dpll import *
-from chaff import *
 from re import sub
 from util import primer
 

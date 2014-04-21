@@ -1,6 +1,5 @@
 from util import *
 from booli import *
-from re import findall
 
 ############ Brute force #########
 
@@ -134,19 +133,19 @@ def DPLLpomo(formula,vrednosti = {}):
         pu2,formula,vrednosti=pucaj2(formula,vrednosti)
         if type(pu2) == dict or type(pu2)==bool: return pu2
 
-    spr = formula.spremenljivke()
     #Izberemo si neko spremenljivko in poizkusimo obe možnosti
-    s = str(formula)
-    b = max(spr,key = lambda x: len(findall(x,s)))
+    b = najpogostejsi(formula)
+    if type(b) == Neg: vr = False; b = b.izr
+    else: vr = True
 
-    formula1 = formula.vstavi({b:True}).poenostavi(chff=True)
-    vrednosti[b] = True
+    formula1 = formula.vstavi({b.ime: vr}).poenostavi(chff=True)
+    vrednosti[b.ime] = vr
     pomo = DPLLpomo(formula1, vrednosti)
     if pomo!=False:
         return pomo
     
-    formula1 = formula.vstavi({b:False}).poenostavi(chff=True)
-    vrednosti[b] = False
+    formula1 = formula.vstavi({b.ime: (not vr)}).poenostavi(chff=True)
+    vrednosti[b.ime] = not vr
     pomo = DPLLpomo(formula1, vrednosti)
     return pomo
 

@@ -1,7 +1,7 @@
 from util import *
 from booli import *
-from time import *
-from random import *
+from time import clock
+from random import random
 from prevedbe import *
 
 

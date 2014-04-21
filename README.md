@@ -3,7 +3,7 @@ lvr
 **Avtorja:** _Tomaž Stepišnik Perdih_ in _Andrej Borštnik_
 ***
 
-Na tem repozituriju se nahajajo SAT solverji (z spremljajočo mehanizacijo), za SAT solver in nekatere prevedbe problemov na SAT.
+Na tem repozituriju se nahajajo SAT solverji (s spremljajočo mehanizacijo) in nekatere prevedbe problemov na SAT.
 
 ***
 **Kazalo:**
@@ -14,10 +14,12 @@ _booli.py_ | Objekti T() = logična resnica, F() neresnica, ..., za predstavitev
 _prevedbe.py_ | Prevedbe nekaterih znanih problemov na SAT (grafi so podani s slovarjem, sudokuji pa s tabelami).
 _util.py_ | Nekatere pomožne funkcije in objekti (sklad, kopica, ...).
 _chaff.py_ | Aproksimacija __*Chaff*__[1] SAT solverja, ne dela povsem.
-*bf_dpll.py* | Naivni SAT solver, ter neka različica *DPLL*[2].
+*bf_dpll.py* | Naivni SAT solver, ter neka različica __*DPLL*__[2].
 *resitelj.py* | Vsebuje SAT solver, navdahnjen z __*Chaff*__[1] in __*GRASP*__[3] SAT solverjema.
 *demo_util.py* | Pomožne funkcije za demonstracijo uporabe preostale kode.
-*demo.py* | Vmesnik (preko IDLE-a) za demonstracijo.
+*demo.py* | Vmesnik (priporočena uporaba preko IDLE-a) za demonstracijo.
+*test.py* | Priročni funkciji za testiranje SAT solverja.
+*primeri_r"([0-9]+)"/* | Enakomerno naključni 3-SAT primeri s r"\1" spremenljivkami [4].
 _*.sud_ | Primeri sudokujev.
 
 ***
@@ -26,6 +28,7 @@ _*.sud_ | Primeri sudokujev.
 1. [Chaff SAT solver](https://www.princeton.edu/~chaff/publication/DAC2001v56.pdf "Chaff")
 2. [DPLL SAT solver](http://en.wikipedia.org/wiki/DPLL_algorithm "DPLL")
 3. [GRASP SAT solver](http://embedded.eecs.berkeley.edu/Alumni/wjiang/ee219b/grasp.pdf "GRASP")
+4. [SATLIB benchmark problemi] (http://www.cs.ubc.ca/~hoos/SATLIB/benchm.html "SATLIB")
 
 ***
 **Uporaba:**
@@ -47,6 +50,13 @@ prikazi(resitev) #samo za sudoku
 ```
 Za reševanje sudokuja sva pripravila priročno funkcijo, ki vse delo opravi sama (`resi_sudoku`).
 Če želite demonstracijo, poženite _demo.py_, ali pa kličite `demo()`, v IDLE-u.
+
+***
+**Testiranje:**
+
+V *test.py* se nahajata funkciji:
+* `test` ... Primeri naj bodo shranjeni v standardnem DIMACS formatu z imeni datotek ime-0 **ŠT** .cnf. Funkciji podate `n`, število primerov, ki bi jih radi pognali, `file`, pot do datoteke (`ime` v prejšnjem stringu). `Printaj` pove ali naj sproti printa čas vsakega izračuna, `sat` pa ali so formule izpolnjive (preverja, ali je prav rešeno). Testiranje vseh 1000 primerov s 100 spremenljivkami traja cca. 1400 sekund.
+* `test1` ... Podamo mu `k`, tj. število primerov in `velikost`, od katere je linearno odvisna pričakovana velikost formule. Test1 uporablja naključne primere iz funkcije `primer`.
 
 ***
 **Lastnosti, prednosti in slabosti:**
