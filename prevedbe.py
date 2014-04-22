@@ -2,45 +2,13 @@ from booli import *
 from re import sub
 from util import primer
 
-t1 = [[0,0,4,0],[0,2,0,3],[2,0,0,0],[0,4,0,1]]
-t2 = [[0,0,0,0],[0,2,0,3],[2,0,0,0],[0,0,0,1]]
-
-lahek = [[0,0,6,0,7,4,0,8,2],
-         [0,0,9,0,0,5,0,0,3],
-         [0,2,0,3,6,0,9,0,5],
-         [0,6,0,5,3,2,0,0,0],
-         [0,0,0,1,0,9,0,0,0],
-         [0,0,0,7,8,6,0,2,0],
-         [7,0,5,0,9,3,0,6,0],
-         [6,0,0,8,0,0,3,0,0],
-         [1,9,0,6,2,0,8,0,0]]
-
-sreden = [[0,1,0,5,0,0,0,6,0],
-           [0,6,0,0,7,1,0,0,2],
-           [5,0,7,8,0,0,0,0,9],
-           [0,0,0,0,0,0,0,9,4],
-           [3,0,1,0,0,0,2,0,6],
-           [7,9,0,0,0,0,0,0,0],
-           [6,0,0,0,0,5,4,0,3],
-           [2,0,0,7,6,0,0,5,0],
-           [0,3,0,0,0,4,0,7,0]]
-
-zloben = [[7,0,0,0,3,0,0,8,0],
-          [0,4,3,0,2,0,0,0,0],
-          [0,0,0,0,6,4,0,9,0],
-          [0,0,1,0,0,7,0,0,0],
-          [8,6,0,0,0,0,0,2,4],
-          [0,0,0,2,0,0,9,0,0],
-          [0,9,0,5,1,0,0,0,0],
-          [0,0,0,0,8,0,2,3,0],
-          [0,5,0,0,7,0,0,0,9]]
-
 
 def prazna(n):
+    """Naredi prazno tabelo nxn."""
     return [[0]*n for i in range(n)]
 
 def barvanje(g,k):
-    """Ali lahko graf podan s slovarjem g pobarvamo s k barvami? """
+    """Prevede problem barvanja grafa g s k barvami na SAT."""
     def sprem(v,b):
         return Spr("\""+str(v)+"\""+","+str(b))
     
@@ -76,6 +44,7 @@ def barvanje(g,k):
 
 
 def povezanost(g):
+    """Prevede problem povezanosti grafa na SAT."""
     def sprem(u,v,n):
         return Spr("C{0}{1}{2}".format(u,v,n))
 
@@ -109,6 +78,7 @@ def povezanost(g):
     return In(f1,f2,f3,f4).poenostavi()
 
 def latinski(tabela1):
+    """Prevede izpolnjevanje latinskega kvadrata na SAT."""
     n = len(tabela1)
     def Sprem(u,v,n):
         return Spr("({0},{1},{2})".format(u,v,n))
@@ -146,7 +116,8 @@ def latinski(tabela1):
     return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez | f5.sez))
 
 
-def sudoku(tabela1):#tale pa kao ni izpolnjiv za t(tudi tale mee errorje). lahko sicer, da sem se kaj zmotil
+def sudoku(tabela1):
+    """Prevede reševanje sudokuja na SAT."""
     n = len(tabela1)
     k = int(n**0.5)
     def Sprem(u,v,n):
@@ -188,7 +159,7 @@ def sudoku(tabela1):#tale pa kao ni izpolnjiv za t(tudi tale mee errorje). lahko
     return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez | f5.sez | f6.sez)).poenostavi(chff=True)
 
 def sudoku1(tabela1):
-    """ Prevede sudoku na sat preko barvanja grafa. """
+    """ Prevede sudoku na SAT preko barvanja grafa. """
     n = len(tabela1)
     k = int(n**0.5)
     #Preslikamo podane spremenljivke sudokuja v [n].
@@ -232,7 +203,6 @@ def sudoku1(tabela1):
     #for i in g: print(i,g[i])
 
     #zamenjamo nazaj imena spremenljivk, namesto številk
-    print(g)
     g = eval(sub(r"([^\(]+?)([0-9]+)([^\)]+?)",r"\1imena[\2-1]\3",str(g)))
     return barvanje(g,n)
 
@@ -240,6 +210,39 @@ def sudoku1(tabela1):
 
 g = {"a":{"b","c","d"},"b":{"a","c"},"c":{"a","b"},"d":{"a"}}
 
+
+t1 = [[0,0,4,0],[0,2,0,3],[2,0,0,0],[0,4,0,1]]
+t2 = [[0,0,0,0],[0,2,0,3],[2,0,0,0],[0,0,0,1]]
+
+lahek = [[0,0,6,0,7,4,0,8,2],
+         [0,0,9,0,0,5,0,0,3],
+         [0,2,0,3,6,0,9,0,5],
+         [0,6,0,5,3,2,0,0,0],
+         [0,0,0,1,0,9,0,0,0],
+         [0,0,0,7,8,6,0,2,0],
+         [7,0,5,0,9,3,0,6,0],
+         [6,0,0,8,0,0,3,0,0],
+         [1,9,0,6,2,0,8,0,0]]
+
+sreden = [[0,1,0,5,0,0,0,6,0],
+           [0,6,0,0,7,1,0,0,2],
+           [5,0,7,8,0,0,0,0,9],
+           [0,0,0,0,0,0,0,9,4],
+           [3,0,1,0,0,0,2,0,6],
+           [7,9,0,0,0,0,0,0,0],
+           [6,0,0,0,0,5,4,0,3],
+           [2,0,0,7,6,0,0,5,0],
+           [0,3,0,0,0,4,0,7,0]]
+
+zloben = [[7,0,0,0,3,0,0,8,0],
+          [0,4,3,0,2,0,0,0,0],
+          [0,0,0,0,6,4,0,9,0],
+          [0,0,1,0,0,7,0,0,0],
+          [8,6,0,0,0,0,0,2,4],
+          [0,0,0,2,0,0,9,0,0],
+          [0,9,0,5,1,0,0,0,0],
+          [0,0,0,0,8,0,2,3,0],
+          [0,5,0,0,7,0,0,0,9]]
 
 
 

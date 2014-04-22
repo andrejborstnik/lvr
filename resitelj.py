@@ -1,18 +1,28 @@
 from util import *
 from booli import *
 from time import clock
-from random import random
+from random import random,shuffle
 from prevedbe import *
 
 def resitelj(formula, time = False):
-    t = clock()
-    a = presitelj(formula)
     t1 = clock()
+    a,b = presitelj(formula)
+    t = clock()-t1
     if time:
-        print("Porabljen čas:",t1-t)
+        print("Časi:")
+        i="zacetno";print("{0:<12}: {1:.3f} {2:.3f}".format(i,b[i],b[i]/t))
+        i="uvod";print("{0:<12}: {1:.3f} {2:.3f}".format(i,b[i],b[i]/t))
+        i="ugibanje";print("{0:<12}: {1:.3f} {2:.3f}".format(i,b[i],b[i]/t))
+        i="sklepanje";print("{0:<12}: {1:.3f} {2:.3f}".format(i,b[i],b[i]/t))
+        i="resiproblem";print("{0:<12}: {1:.3f} {2:.3f}".format(i,b[i],b[i]/t))
+        i="konstavek";print("{0:<12}: {1:.3f} {2:.3f}".format(i,b[i],b[i]/t))
+        i="periode";print("{0:<12}: {1:.3f} {2:.3f}".format(i,b[i],b[i]/t))
+        print("{0:<12}: {1:.3f}".format("skupno",t))
     return a
 
 def presitelj(formula):
+
+    casi = {"zacetno":0,"ugibanje":0,"sklepanje":0,"resiproblem":0,"periode":0,"konstavek":0,"uvod":0}
 
 ########################## ZAČETNO ČIŠČENJE ####################################################
 
@@ -28,7 +38,8 @@ def presitelj(formula):
         else:
             a = vrednost[lit.izr.ime]
             return a if a==None else (not a)
-    
+
+    zac = clock()
         
     vrednost = {i:None for i in formula.spremenljivke()}
     form = formula.poenostavi(chff=True)
@@ -57,11 +68,14 @@ def presitelj(formula):
         elif type(form)==Neg: vrednost[form.izr.ime] = False; return vrednost
         elif type(form)==Spr: vrednost[form.ime] = True; return vrednost
 
+    casi["zacetno"]+=clock()-zac
     
     #Ostali so nam le Ali-ji dolžine 2 in več
 
     
 ############################ NEKATERE DEFINICIJE #####################################################################
+
+    zac = clock()
     
     proban = {}                                             #ključi so imena spremenljivk. 1 - v eno smer proban, 2 - obe možnosti že preizkušeni
     literali = {}                                           #ključi so literali. za vsak literal iz formule pove kako pogost je
@@ -76,51 +90,57 @@ def presitelj(formula):
     #poiščemo vse literale v naši formuli
     for stavek in form.sez:
         n = len(stavek.sez)
-        izpolnjen[stavek]=False
-        ponastavi[stavek]=False
+        #izpolnjen[stavek]=False
+        #ponastavi[stavek]=False
         for lit in stavek.sez:
-            literali[lit]=literali.get(lit,0)+ 10/n
+            literali[lit]=literali.get(lit,0)+ 1
             literali[neg(lit)] = literali.get(neg(lit),0)
             stavki[lit] = stavki.get(lit,[])+[stavek]
             stavki[neg(lit)] = stavki.get(neg(lit),[])
 
     stliteralov = len(literali)
-    perioda1 = 40
-    perioda2 = 1000
-    koef = 0.5
-    stevec1 = 0
-    stevec2 = 0
-    ponastavitev=1
-    cas = 0
+    perioda = 40
+    koef = 0.2
+    stevec = 0
+    casi["uvod"]+=clock()-zac
+    
             
 ################################ POMOŽNE FUNKCIJE ######################################################################
     def ugibaj():
         """Izbere literal brez določene vrednosti, ki je najpogostejši."""
-        y = max(literali,key= lambda x: literali[x] + (random()/2 if literali[x]>0 else 0))
+        zac=clock()
+        temp = list(literali.keys())
+        shuffle(temp)
+        y = max(temp,key= lambda x: literali[x])
         
         if literali[y]<=0.0:
+            casi["ugibanje"]+=clock()-zac
             return None
         else:
             vzrok[y] = []
-            for stavek in stavki[y]:
-                izpolnjen[stavek]=True
+            #for stavek in stavki[y]:
+            #    izpolnjen[stavek]=True
+            casi["ugibanje"]+=clock()-zac
             return y
         
     def sklepaj(novi,a):
         """Po ugibanju tranzitivno naredi sklepe, ki iz njega sledijo"""
         temp = []
+        zac = clock()
         for lit,zakaj in novi:
             sklepi[a].add(lit)
             vzrok[lit] = zakaj
-            for stavek in stavki[lit]:
-                izpolnjen[stavek]=True
+            #for stavek in stavki[lit]:
+            #    izpolnjen[stavek]=True
             literali[lit]=-abs(literali[lit])   #frekvenci spremeni predznak, da vemo da je že izbran - zato ga ne izberemo še enkrat
             literali[neg(lit)]=-abs(literali[neg(lit)])
-            
+
+        #pogledamo za enojce    
         for lit,_ in novi:
             x = ime(lit)
             if type(lit)==Spr:
                 if vrednost[x] == False:
+                    casi["sklepanje"]+=clock()-zac
                     return "konflikt",lit   #prišlo je do konflikta
                 elif vrednost[x] == None:
                     vrednost[x]=True
@@ -128,6 +148,7 @@ def presitelj(formula):
                     
             elif type(lit)==Neg:
                 if vrednost[x]:
+                    casi["sklepanje"]+=clock()-zac
                     return "konflikt",lit   #prišlo je do konflikta
                 elif vrednost[x] == None:
                     vrednost[x]=False
@@ -136,23 +157,32 @@ def presitelj(formula):
             else:
                 raise InternalError("Formula je v napačnem formatu.")
             
-            if temp and temp[0]=="konflikt": return temp
+            if temp and temp[0]=="konflikt":
+                casi["sklepanje"]+=clock()-zac
+                return temp
 
-        #temp+=ciste()
-        
+        #pogledamo za čiste spremenljivke
+##        for spr in vrednost:
+##            if vrednost[spr]==None:
+##                lit = Spr(spr)
+##                til = Neg(lit)
+##                a = [st for st in stavki[lit] if not izpolnjen[st]]
+##                b = [st for st in stavki[til] if not izpolnjen[st]]
+##                if a and not b:
+##                    temp.append((lit,[neg(x) for st in stavki[til] for x in st.sez if vred(x)]))
+##                elif b and not a:
+##                    temp.append((til,[neg(x) for st in stavki[lit] for x in st.sez if vred(x)]))
+##
+        casi["sklepanje"]+=clock()-zac
         return temp
 
     def preglej(l,temp):
         """Literal l je bil nastavljen na False. Pogleda katere implikacije iz tega sledijo. """
-        #print("trenutne vrednosti",vrednost)
-        #print("negirali smo:",l,vred(l))
         for st in stavki[l]:
-            #print("stavek:",st)
             izpolnjen = False
             nevredni = [] 
             for lit in st.sez:
                 if vred(lit)==True:
-                    #print(lit)
                     #stavek je že izpolnjen, iz njega ne bo novih sklepov
                     izpolnjen = True
                     break
@@ -160,18 +190,19 @@ def presitelj(formula):
                     nevredni.append(lit)
             if not izpolnjen and len(nevredni)==1:
                 temp.append((nevredni[0],[i for i in st.sez if i!=nevredni[0]]))
-            #print("izpolnjen:",izpolnjen)
-            #print("nevredni so:",nevredni)
         return temp
                 
 
     def resiproblem(ugibanja,kons):
         """Če pride do protislovja pri ugibanju sestopa dokler ne odstranimo vsaj enega od sklepov, ki so pripeljali do težav."""
+        zac = clock()
         indeksi = sorted([ugibanja.index(neg(l)) for l in kons.sez]) #indeksi
         i = indeksi[-1]
         while proban[ime(ugibanja[i])]==2:
             i-=1
-            if i<0: return "konec" #vse možnosti že sprobane
+            if i<0:
+                casi["resiproblem"]+=clock()-zac
+                return "konec" #vse možnosti že sprobane
         #odstranimo vse sklepe ki smo jih naredili od tega ugibanja dalje
         for odl in range(i,len(ugibanja)):
             for lit in sklepi[ugibanja[odl]]:
@@ -185,17 +216,19 @@ def presitelj(formula):
                 del proban[ime(ugibanja[odl])]
         naslednji[0] = neg(ugibanja[i])
         ugibanja = ugibanja[:i]
-        
-        izpolnjen.update(ponastavi)
-        for lit in vzrok:
-            for stavek in stavki[lit]:
-                izpolnjen[stavek]=True
+        casi["resiproblem"]+=clock()-zac
+        #izpolnjen.update(ponastavi)
+        #for lit in vzrok:
+        #    for stavek in stavki[lit]:
+        #        izpolnjen[stavek]=True
         
         return ugibanja
 
     def konstavek(lit):
         """Vrne nov stavek, ki prepreči ponavljanje ugibanj, za katera smo ugotovili da skupaj vodijo do protislovja. """
+        zac=clock()
         nabor = vzrok.get(neg(lit),[])+vzrok.get(lit,[])
+        koreni = []
         c= True
         while c:
             c = False
@@ -206,9 +239,10 @@ def presitelj(formula):
                     c = True
                     tempo+= a
                 else:
-                    tempo.append(x)
+                    koreni.append(x)
             nabor = tempo
-        return Ali(*tuple(nabor))
+        casi["konstavek"]+=clock()-zac
+        return Ali(*tuple(koreni))
 
             
 ##################################################### TEŽKO DELO ############################################################################       
@@ -218,89 +252,57 @@ def presitelj(formula):
         if naslednji[0]:
             a = naslednji[0]
             vzrok[a]=[]
-            for stavek in stavki[a]:
-                izpolnjen[stavek]=True
+            #for stavek in stavki[a]:
+            #    izpolnjen[stavek]=True
             naslednji[0]=False
         else:
             a = ugibaj()
         if not a:
-            return vrednost #vsi literali imajo vrednost
+            return vrednost,casi #vsi literali imajo vrednost
         
         ugibanja.append(a)
-        #print("ugibanja:",ugibanja)
         proban[ime(a)]=proban.get(ime(a),0)+1
         sklepi[a]=set()
         novi = [(a,[])]
         while novi and novi[0]!="konflikt":
-            novi = sklepaj(novi,a)
-
-        #print("sklepi:",sklepi)
-        #print(vzrok)
-        #print()
+            novi = sklepaj(novi,a)       
         
         if novi and novi[0]=="konflikt":     #treba trackat backat
             kons = konstavek(novi[1])
-            stevec1+=1
-            stevec2+=1
-            #print(ugibanja,"kons=",kons)
+            #ponastavi[kons]=False
+            stevec+=1
             ugibanja = resiproblem(ugibanja,kons)
-            if ugibanja == "konec": return "Formula ni izpolnljiva"
-            
-            if stevec1==perioda1:
+            if ugibanja == "konec": return "Formula ni izpolnljiva",casi
+
+            zac=clock()
+            if stevec==perioda:
                 #deli prioritete
-                stevec1=0
+                stevec=0
                 for x in literali:
-                    literali[x]/=koef
+                    literali[x]*=koef
 
             #dodamo konfliktni stavek
             n = len(kons.sez)
             for i in kons.sez:
                 stavki[i].append(kons)
-                if literali[i]>0 or literali[neg(i)]>0: literali[i]+=10/n
-                else: literali[i]-=10/n
-                
-            if stevec2==(perioda2*luby(ponastavitev)):
-                #naredi restart, znanje pridobljeno s konfliktnimi stavki ostane
-                print("restart")
-                stevec2=0
-                ponastavitev+=1
-                naslednji = [False]
-                vzrok = {}                                              
-                sklepi = {}                                           
-                ugibanja = []
-                izpolnjenost = {}
-                proban = {}
-                for i in literali:
-                    vrednost[ime(i)]=None
-                for lit in literali:
-                    literali[lit]=0
-                    for st in stavki[lit]:
-                        literali[lit]+=10/len(st.sez)
+                if literali[i]>0 or literali[neg(i)]>0: literali[i]+=1
+                else: literali[i]-=1
 
-
-        for stavek in izpolnjen:
-            ok = False
-            for lit in stavek.sez:
-                if vred(lit)!=False:
-                    ok=True
-                    break
-            if not ok:
-                print("ogenj v strehi")
-                
-                
+            casi["periode"]+=clock()-zac                
             
 
     
 prim1 = In(Ali(Spr("x"),Spr("z")),Ali(Spr("x"),Spr("u")),Ali(Spr("x"),Spr("v")),Ali(Neg(Spr("x")),Neg(Spr("y"))),Ali(Neg(Spr("x")),Spr("y")))
                 
 
-##x = latinski(prazna(6));
-##print("n=",6,x.vrednost(resitelj(x,True)))
-##print()
-##
-##x = latinski(prazna(7));
-##y = resitelj(x,True)
-##print("n=",7,x.vrednost(y))
+x = latinski(prazna(6));
+y = resitelj(x,True)
+print("n=",6,x.vrednost(y))
+print()
+
+x = latinski(prazna(7));
+y = resitelj(x,True)
+print("n=",7,x.vrednost(y))
 
 ##                
 ##l= sudoku(lahek)
