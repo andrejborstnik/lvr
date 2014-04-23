@@ -115,8 +115,46 @@ def latinski(tabela1):
 
     return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez | f5.sez))
 
-
 def sudoku(tabela1):
+    """Prevede reševanje sudokuja na SAT."""
+    n = len(tabela1)
+    k = int(n**0.5)
+    def Sprem(u,v,n):
+        return Spr("{0},{1},{2}".format(u,v,n))
+
+    spr = set()
+    imena = [None]*n
+    obrimena = {}
+    st = 0
+    tabela = [[j if j not in ["0","None"] else 0 for j in i] for i in tabela1]
+    for i in range(n):
+        for j in range(n):
+            if tabela[i][j] not in [0, "0","None",None] and tabela[i][j] not in spr:
+                imena[st] = tabela[i][j]
+                obrimena[tabela[i][j]] = st
+                st+=1
+                spr.add(tabela[i][j])
+    st = 0
+    imena = [imena[i-1] if imena[i-1] else i for i in range(1,n+1)]
+
+    #v vsakem polju vsaj ena številka
+    f1 = In(*tuple(Ali(*tuple(Sprem(i,j,imena[l-1]) for l in range(1,n+1)))for i in range(n) for j in range(n)))
+
+    #če je v vrstici na nekem polju št., je na drugih ni
+    f2 = In(*tuple(Ali(Neg(Sprem(i,z,imena[l-1])),Neg(Sprem(i,j,imena[l-1]))) for l in range(1,n+1) for i in range(n)for z in range(n) for j in range(z+1,n)))
+
+    #če je v stoplcu na nekem polju št., je na drugih ni
+    f3 = In(*tuple(Ali(Neg(Sprem(z,i,imena[l-1])),Neg(Sprem(j,i,imena[l-1]))) for l in range(1,n+1) for i in range(n)for z in range(n) for j in range(z+1,n)))
+
+    #če je v kvadratku na nekem polju št., je na drugih ni
+    f4 = In(*tuple(Ali(Neg(Sprem(k*(i//k)+z//k,k*(i%k)+z%k,imena[l-1])),Neg(Sprem(k*(i//k)+j//k,k*(i%k)+j%k,imena[l-1]))) for l in range(1,n+1) for i in range(n)for z in range(n) for j in range(z+1,n)))
+
+    #nastavimo začetne vrednosti
+    f5 = In(*tuple(Sprem(i,j,tabela[i][j]) if tabela[i][j] not in [0, "0","None",None] else T() for i in range(n) for j in range(n)))
+
+    return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez | f5.sez)).poenostavi(chff=True)
+
+def sudoku1(tabela1):
     """Prevede reševanje sudokuja na SAT."""
     n = len(tabela1)
     k = int(n**0.5)

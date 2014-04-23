@@ -41,10 +41,10 @@ def presitelj(formula,restart,lub):
     vrednost = {i:None for i in formula.spremenljivke()}
     form = formula.poenostavi(chff=True)
 
-    if type(form)==T: return vrednost
-    elif type(form)==F: return "Formula ni izpolnljiva"
-    elif type(form)==Neg: vrednost[form.izr.ime] = False; return vrednost
-    elif type(form)==Spr: vrednost[form.ime] = True; return vrednost
+    if type(form)==T: return vrednost,[]
+    elif type(form)==F: return "Formula ni izpolnljiva",[]
+    elif type(form)==Neg: vrednost[form.izr.ime] = False; return vrednost,[]
+    elif type(form)==Spr: vrednost[form.ime] = True; return vrednost,[]
 
     #Najprej določimo vrednost enojcem
     nove = True
@@ -60,10 +60,10 @@ def presitelj(formula,restart,lub):
                 
         form = form.vstavi(nove).poenostavi(chff=True)
 
-        if type(form)==T: return vrednost
-        elif type(form)==F: return "Formula ni izpolnljiva"
-        elif type(form)==Neg: vrednost[form.izr.ime] = False; return vrednost
-        elif type(form)==Spr: vrednost[form.ime] = True; return vrednost
+        if type(form)==T: return vrednost,[]
+        elif type(form)==F: return "Formula ni izpolnljiva",[]
+        elif type(form)==Neg: vrednost[form.izr.ime] = False; return vrednost,[]
+        elif type(form)==Spr: vrednost[form.ime] = True; return vrednost,[]
 
     casi["zacetno"]+=clock()-zac
     
