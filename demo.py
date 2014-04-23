@@ -50,7 +50,7 @@ def demo():
 
             #print("Naloga:  \n")
             #print("\nRešeni sudoku:  \n")
-            resi_sudoku(tabela = [[None]], izpisi = True, solver = "DPLL")
+            resi_sudoku(tabela = [[None]], izpisi = True, solver = "DPLL",cas = True)
 
             print("\nPoizkusite še sami!\n")
         else:
@@ -68,7 +68,7 @@ def demo():
             output_file = input("Vnesi izhodno datoteko:  ")
             solver = sol()
             izpis_output_file = input("Vnesi datoteko, kamor naj lepo izpišem sudoku:  ")
-            resi_sudoku(tabela,input_file,izpisi,output_file,solver,izpis_output_file)
+            resi_sudoku(tabela,input_file,izpisi,output_file,solver,izpis_output_file, cas = True)
             print("")
         except UsageError as e:
             print("\nPrišlo je do naslednje napake: {0}\n".format(e.value))

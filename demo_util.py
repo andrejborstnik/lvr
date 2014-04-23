@@ -3,11 +3,12 @@ from util import *
 from chaff import chaff
 from re import sub
 from os import path
+from time import clock
 from bf_dpll import bfSAT, DPLL
 from resitelj import resitelj
 #a = sudoku([["Bla",None,None,None],["Kor",None,None,None],["AS",None,None,None],["MA",None,None,None]])
 
-def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver = "chaff", izpis_output_file=""):
+def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver = "chaff", izpis_output_file="", cas = False):
     """ v datoteki pričakuje sudoku v formatu (primer 2x2):
     # a,b \n
     # c,d \n
@@ -68,7 +69,10 @@ def resi_sudoku(tabela=[], input_file="", izpisi=False, output_file="", solver =
         elif type(tabela[i])!=list:
             raise UsageError("{0}. \"vrstica\" v \"sudokuju\" ni tabela.".format(i+1))
     if izpisi: print("\nNaloga:\n");prikazi(tabela);print("\ndelam...  \n")
+    cas1=clock()
     res = eval(solver+"(sudoku(tabela))")
+    cas2=clock()
+    if cas: print("Porabljen čas:  {0}".format(cas2-cas1))
     #za to si rabimo nekje zapomnit imena
     #res = eval(sub(r"([^\(]+?)([0-9]+)([^\)]+?)",r"\1imena[\2-1]\3",str(res))
     if res == "Formula ni izpolnljiva":

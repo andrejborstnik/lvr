@@ -24,10 +24,10 @@ def test(n, file, printaj=False, sat = True):
             if a!="Problem ni izpolnjiv":
                 print("NE DELAM PRAV!")
         t+=t2-t1
-        if printaj: print("Porabljen čas:  {0}".format(t2-t1))
+        if printaj: print("Porabljen čas za {0} problem:  {1}".format(i,t2-t1))
     return t
 
-#rez = test(10,"./primeri_100/uf100")
+#rez = test(1000,"./primeri_100/uf100")
 #print(rez)
     
 def test1(k,velikost = 70):
