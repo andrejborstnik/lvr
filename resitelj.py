@@ -36,19 +36,20 @@ def presitelj(formula,restart,lub):
             a = vrednost1[-lit]
             return a if a==None else (not a)
 
-    zac = clock()
+    
         
     vrednost = {i:None for i in formula.spremenljivke()}
     form = formula.poenostavi(chff=True)
 
-    if type(form)==T: return vrednost,[]
-    elif type(form)==F: return "Formula ni izpolnljiva",[]
-    elif type(form)==Neg: vrednost[form.izr.ime] = False; return vrednost,[]
-    elif type(form)==Spr: vrednost[form.ime] = True; return vrednost,[]
+    if type(form)==T: return vrednost,casi
+    elif type(form)==F: return "Formula ni izpolnljiva",casi
+    elif type(form)==Neg: vrednost[form.izr.ime] = False; return vrednost,casi
+    elif type(form)==Spr: vrednost[form.ime] = True; return vrednost,casi
 
     #Najprej določimo vrednost enojcem
     nove = True
     while nove:
+        zac = clock()
         nove = {}
         for stavek in form.sez:
             if type(stavek) == Spr:
@@ -60,12 +61,14 @@ def presitelj(formula,restart,lub):
                 
         form = form.vstavi(nove).poenostavi(chff=True)
 
-        if type(form)==T: return vrednost,[]
-        elif type(form)==F: return "Formula ni izpolnljiva",[]
-        elif type(form)==Neg: vrednost[form.izr.ime] = False; return vrednost,[]
-        elif type(form)==Spr: vrednost[form.ime] = True; return vrednost,[]
+        casi["zacetno"]+=clock()-zac
 
-    casi["zacetno"]+=clock()-zac
+        if type(form)==T: return vrednost,casi
+        elif type(form)==F: return "Formula ni izpolnljiva",casi
+        elif type(form)==Neg: vrednost[form.izr.ime] = False; return vrednost,casi
+        elif type(form)==Spr: vrednost[form.ime] = True; return vrednost,casi
+
+    
     
     #Ostali so nam le Ali-ji dolžine 2 in več
 
