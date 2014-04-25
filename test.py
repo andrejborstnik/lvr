@@ -41,11 +41,6 @@ def test(n, file, printaj=False, sat = True):
         if printaj: print("Porabljen čas za {0}. problem:  {1}".format(i,t2-t1))
     return t
 
-#rez = test("1-1000","./primeri_50/uf50")
-rez = test("1-1000","./primeri_100/uf100")
-#rez = test("1-100","./primeri_150/uf150",True)
-#rez = test("2,4,12,19,21,24,25","./primeri_250/uf250",True)
-print("\nSkupni čas:  {0}".format(rez))
     
 def test1(k,velikost = 70):
     t1=0
@@ -65,3 +60,11 @@ def test1(k,velikost = 70):
         
     print("Časa: {0}, {1}".format(t1,t2))
     return None
+
+
+
+#rez = test("1-1000","./primeri_50/uf50")
+#rez = test("1-1000","./primeri_100/uf100",True)
+#rez = test("1-100","./primeri_150/uf150",True)
+#rez = test("2,4,12,19,21,24,25","./primeri_250/uf250",True)
+#print("\nSkupni čas:  {0}".format(rez))

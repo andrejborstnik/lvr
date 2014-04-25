@@ -2,7 +2,6 @@ from util import *
 from booli import *
 from time import clock
 from random import random,shuffle,seed
-from prevedbe import *
 
 def resitelj(formula, time = False, restart = False):
     t1 = clock()
@@ -86,7 +85,6 @@ def presitelj(formula,restart,lub):
     naslednji = [False]                                     #vsebuje literal. če imamo določeno kaj probamo naslednje (ko pride do konflikta, se vrnemo do zadnje odločitve ne sprobane v obe smeri. S tem določimo da je naslednja na vrsti druga možnost za to ugibanje) 
     stevec1 = 0
     stevec2 = 0
-    lub = 1
 
     #literale preimenujemo v številke - dela bistveno hitreje
     stevilka = {}
@@ -296,53 +294,3 @@ def presitelj(formula,restart,lub):
                 return presitelj(formula,restart,lub)
 
             casi["periode"]+=clock()-zac
-
-            
-
-    
-prim1 = In(Ali(Spr("x"),Spr("z")),Ali(Spr("x"),Spr("u")),Ali(Spr("x"),Spr("v")),Ali(Neg(Spr("x")),Neg(Spr("y"))),Ali(Neg(Spr("x")),Spr("y")))
-                
-
-##x = latinski(prazna(6));
-##y = resitelj(x,True,True)
-##print("n=",6,x.vrednost(y))
-##print()
-##
-##x = latinski(prazna(7));
-##y = resitelj(x,True,True)
-##print("n=",7,x.vrednost(y))
-
-##                
-##l= sudoku(lahek)
-##print("Lahek: ", l.vrednost(resitelj(l,True)))
-##print()
-
-##s= sudoku(sreden)
-##print("Sreden: ", s.vrednost(resitelj(s,True)))
-##print()
-##
-##z= sudoku(zloben)
-##print("Zloben: ", z.vrednost(resitelj(z,True)))
-
-                    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

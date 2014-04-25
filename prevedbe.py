@@ -39,7 +39,7 @@ def barvanje(g,k):
 
     formula = In(f1,f2,f3)
 
-    return formula.poenostavi()
+    return formula.poenostavi(cnf=True)
 
 
 
@@ -77,8 +77,8 @@ def povezanost(g):
     print(In(f1,f2,f3,f4))
     return In(f1,f2,f3,f4).poenostavi()
 
-def sudoku(tabela1):
-    """Prevede reševanje sudokuja na SAT."""
+def latinski1(tabela1):
+    """Prevede izpolnjevanje latinskega kvadrata na SAT."""
     n = len(tabela1)
     k = int(n**0.5)
     def Sprem(u,v,n):
@@ -113,7 +113,7 @@ def sudoku(tabela1):
 
     return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez)).poenostavi(chff=True)
 
-def latinski1(tabela1):
+def latinski(tabela1):
     """Prevede izpolnjevanje latinskega kvadrata na SAT."""
     n = len(tabela1)
     def Sprem(u,v,n):
@@ -232,8 +232,8 @@ def sudoku1(tabela1):
 
     return In(*tuple(i for i in f1.sez | f2.sez | f3.sez | f4.sez | f5.sez | f6.sez)).poenostavi(chff=True)
 
-def sudoku1(tabela1):
-    """ Prevede sudoku na SAT preko barvanja grafa. """
+def sudoku2(tabela1):
+    """ Prevede sudoku na SAT preko barvanja grafa. Prevedba je lahko počasna."""
     n = len(tabela1)
     k = int(n**0.5)
     #Preslikamo podane spremenljivke sudokuja v [n].
@@ -284,6 +284,7 @@ def sudoku1(tabela1):
 
 g = {"a":{"b","c","d"},"b":{"a","c"},"c":{"a","b"},"d":{"a"}}
 
+prim1 = In(Ali(Spr("x"),Spr("z")),Ali(Spr("x"),Spr("u")),Ali(Spr("x"),Spr("v")),Ali(Neg(Spr("x")),Neg(Spr("y"))),Ali(Neg(Spr("x")),Spr("y")))
 
 t1 = [[0,0,4,0],[0,2,0,3],[2,0,0,0],[0,4,0,1]]
 t2 = [[0,0,0,0],[0,2,0,3],[2,0,0,0],[0,0,0,1]]
