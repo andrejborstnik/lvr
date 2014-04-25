@@ -1,7 +1,8 @@
 lvr
 ===
 **Avtorja:** _Tomaž Stepišnik Perdih_ in _Andrej Borštnik_
-**Ekipa:** :rocket:
+
+**Ekipa**   :rocket:
 ***
 
 Na tem repozituriju se nahajajo SAT solverji (s spremljajočo mehanizacijo) in nekatere prevedbe problemov na SAT.
@@ -59,7 +60,7 @@ Za reševanje sudokuja sva pripravila priročno funkcijo, ki vse delo opravi sam
 **Testiranje:**
 
 V *test.py* se nahajata funkciji:
-* `test` ... Primeri naj bodo shranjeni v standardnem DIMACS formatu z imeni datotek ime-0 **ŠT** .cnf. Funkciji podate `n`, primere, ki bi jih radi pognali (n je niz oblike npr. "2-5,8,4-10"), `file`, pot do datoteke (`ime` v prejšnjem stringu). `Printaj` pove ali naj sproti izpisuje čas vsakega izračuna, `sat` pa ali so formule izpolnjive (preverja, ali je prav rešeno). Testiranje vseh 1000 primerov s 100 spremenljivkami traja cca. 400 sekund. 100 priperov s 150 spremenljivkami traja cca. 750 sekund (primeri iz[4]). 1000 primerov s 50 spremenljivkami traja cca. 40 sekund.
+* `test` ... Primeri naj bodo shranjeni v standardnem DIMACS formatu z imeni datotek ime-0 **ŠT** .cnf. Funkciji podate `n`, primere, ki bi jih radi pognali (n je niz oblike npr. "2-5,8,4-10"), `file`, pot do datoteke (`ime` v prejšnjem stringu). `Printaj` pove ali naj sproti izpisuje čas vsakega izračuna, `sat` pa ali so formule izpolnjive (preverja, ali je prav rešeno). Testiranje vseh 1000 primerov s 100 spremenljivkami traja cca. 400 sekund. 100 primerov s 150 spremenljivkami traja cca. 750 sekund (primeri iz[4]). 1000 primerov s 50 spremenljivkami traja cca. 40 sekund.
 * `test1` ... Podamo mu `k`, tj. število primerov in `velikost`, od katere je linearno odvisna pričakovana velikost formule. Test1 uporablja naključne primere iz funkcije `primer`.
 
 ***
