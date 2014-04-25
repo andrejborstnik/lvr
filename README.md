@@ -1,6 +1,7 @@
 lvr
 ===
 **Avtorja:** _Tomaž Stepišnik Perdih_ in _Andrej Borštnik_
+**Ekipa:** :rocket:
 ***
 
 Na tem repozituriju se nahajajo SAT solverji (s spremljajočo mehanizacijo) in nekatere prevedbe problemov na SAT.
@@ -58,7 +59,7 @@ Za reševanje sudokuja sva pripravila priročno funkcijo, ki vse delo opravi sam
 **Testiranje:**
 
 V *test.py* se nahajata funkciji:
-* `test` ... Primeri naj bodo shranjeni v standardnem DIMACS formatu z imeni datotek ime-0 **ŠT** .cnf. Funkciji podate `n`, število primerov, ki bi jih radi pognali, `file`, pot do datoteke (`ime` v prejšnjem stringu). `Printaj` pove ali naj sproti izpisuje čas vsakega izračuna, `sat` pa ali so formule izpolnjive (preverja, ali je prav rešeno). Testiranje vseh 1000 primerov s 100 spremenljivkami traja cca. 1400 sekund.
+* `test` ... Primeri naj bodo shranjeni v standardnem DIMACS formatu z imeni datotek ime-0 **ŠT** .cnf. Funkciji podate `n`, primere, ki bi jih radi pognali (n je niz oblike npr. "2-5,8,4-10"), `file`, pot do datoteke (`ime` v prejšnjem stringu). `Printaj` pove ali naj sproti izpisuje čas vsakega izračuna, `sat` pa ali so formule izpolnjive (preverja, ali je prav rešeno). Testiranje vseh 1000 primerov s 100 spremenljivkami traja cca. 400 sekund. 100 priperov s 150 spremenljivkami traja cca. 750 sekund (primeri iz[4]). 1000 primerov s 50 spremenljivkami traja cca. 40 sekund.
 * `test1` ... Podamo mu `k`, tj. število primerov in `velikost`, od katere je linearno odvisna pričakovana velikost formule. Test1 uporablja naključne primere iz funkcije `primer`.
 
 ***
@@ -66,5 +67,5 @@ V *test.py* se nahajata funkciji:
 
 1. Algoritem `chaff` prehitro zavrže valuacije, ki bi lahko bile prave. Če pa vrne valuacijo je ta pravilna. Odpravljanje napak je bilo zaradi časovne stiske opuščeno.
 2. V algoritmu `resitelj` sva se znebila kontrolnih literalov (ter s tem precej sivih las) in dodala uporabo konfliktnih stavkov. Čas, ki ga potrebuje za rešitev istega problema lahko močno niha. Rešitev za to naj bi bili restarti - algoritem poženemo od začetka, če se zdi, da smo zašli v slabe veje ugibanja. Ker so se poskusi implementacije tega končali neuspešno, oziroma niso prinesli vidnih izboljšav, sva delo na tem opustila. Pri izbiri literalov za ugibanje uporabljava svojo hevristiko, upoštevava pa v koliko stavkih se literal pojavi in kako dolgi so ti stavki. Večina energije je šla v zasnovo algoritma, sama implementacija pa ni močno optimizirana. Moč algoritma se zato bolje opazi na res velikih primerih.
-3. Funkcija `poenostavi` ima samo tri možnosti (cnf, dnf in samo krajšanje True/False). Zato ga je zelo zamudno poganjati, tudi na formulah blizu cnf/dnf. `resitelj` in `chaff` zato trenutno predpostavita, da je formula, ki jo dobita že v cnf (lahko ima samo vgnezdene Ali-je oz. In-e).
+3. Funkcija `poenostavi` ima samo tri možnosti (cnf, krajšanje in samo krajšanje True/False). Zato ga je zelo zamudno poganjati, tudi na formulah blizu cnf/pokrajšane. `resitelj` in `chaff` zato trenutno predpostavita, da je formula, ki jo dobita že v cnf (lahko ima samo vgnezdene Ali-je oz. In-e).
 
