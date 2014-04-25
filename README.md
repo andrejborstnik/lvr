@@ -38,7 +38,7 @@ _*.sud_ | Primeri sudokujev.
 ***
 **Uporaba:**
 
-Najprej sestavimo logično formulo in si jo shranimo. To lahko naredimo na več načinov:
+Algoritem testiramo tako, da poženemo test.py. V kodi se lahko odkomentira testiranje algoritma na primerih [4]. Lahko pa ga uporabnik testira na poljubni cnf formuli. Najprej sestavimo logično formulo in si jo shranimo. To lahko naredimo na več načinov:
 
 1. Logično formulo napišite na roko (npr. `In(Spr("a"),Neg(Spr("b")),T())` = `a /\ ~b /\ True`)
 2. Uporabite eno od napisanih prevedb (npr. `sudoku([[0]]))`, `povezanost({"a":{"b"},"b":{"a"}})`).
@@ -51,7 +51,7 @@ Primer uporabe:
 tabela = [[0]*4 for i in range(4)]
 formula = sudoku(tabela)
 resitev = resitelj(formula)
-prikazi(resitev) #samo za sudoku
+prikazi(resit(resitev,len(tabela))) #samo za sudoku
 ```
 Za reševanje sudokuja sva pripravila priročno funkcijo, ki vse delo opravi sama (`resi_sudoku`).
 Če želite demonstracijo, poženite _demo.py_, ali pa kličite `demo()`, v IDLE-u.
